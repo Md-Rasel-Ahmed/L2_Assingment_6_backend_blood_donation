@@ -9,6 +9,7 @@ import express, {
 import httpStatus from "http-status";
 import config from "./app/config";
 import { AuthRoute } from "./app/modules/auth/auth.route";
+import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 
 const app: Application = express();
 
@@ -37,6 +38,6 @@ app.get("/", async (req: Request, res: Response) => {
 	});
 });
 
-
+app.use(globalErrorHandler)
 
 export default app;
