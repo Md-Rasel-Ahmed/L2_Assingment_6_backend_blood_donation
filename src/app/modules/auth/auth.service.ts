@@ -2,8 +2,10 @@ import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import httpStatus from "http-status"
 import { ISingup } from "./auth.interface"
-
+import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import { createToken } from "../../utils/jwtHelpers"
+import config from "../../config"
 
 const singup = async(payload:ISingup)=>{
     const {email,name="Jhon",phone="53663523535",address,district,password,upazila}=payload
@@ -56,7 +58,17 @@ const login =async (payload:any)=>{
         throw new AppError(httpStatus.BAD_REQUEST,"Password Did Not Match")
     }
 
-
+    const jwtPayload={
+        userId:isExistUser.id,
+        email:isExistUser.email,
+        role:isExistUser.role, 
+    }
+    const accessToken=await createToken(jwtPayload,config.jwt_access_secret,"1d")
+    const refreshToken=await createToken(jwtPayload,config.jwt_refresh_secret,"7d")
+    return {
+        accessToken,
+        refreshToken
+    }
 }
 
 export const AuthService ={
