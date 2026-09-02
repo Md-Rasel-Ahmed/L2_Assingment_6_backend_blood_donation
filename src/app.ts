@@ -10,6 +10,7 @@ import httpStatus from "http-status";
 import config from "./app/config";
 import { AuthRoute } from "./app/modules/auth/auth.route";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import { PatientRoute } from "./app/modules/patient/patient.route";
 
 const app: Application = express();
 
@@ -29,6 +30,7 @@ app.use(cookieParser());
 
 
 app.use("/api/v1/auth",AuthRoute)
+app.use("/api/v1/patient",PatientRoute)
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

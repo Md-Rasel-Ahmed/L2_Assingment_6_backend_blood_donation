@@ -1,0 +1,15 @@
+model RequestResponse {
+    id String @id @default(uuid())
+
+    requestId String
+    request   BloodRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+    donorId String
+    donor   User   @relation(fields: [donorId], references: [id], onDelete: Cascade)
+
+    message   String?
+    status    String   @default("PENDING")
+    createdAt DateTime @default(now())
+
+    @@unique([requestId, donorId])
+}

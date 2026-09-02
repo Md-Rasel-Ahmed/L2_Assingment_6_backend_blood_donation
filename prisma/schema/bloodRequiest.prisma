@@ -1,0 +1,22 @@
+model BloodRequest {
+    id        String @id @default(uuid())
+    patientId String @unique
+    patient   User   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+    patientName  String
+    bloodGroup   BloodGroup
+    bagsNeeded   Int               @default(1)
+    hospitalName String
+    district     String
+    upazila      String
+    hospitalAddr String
+    neededBy     DateTime
+    urgency      UrgencyLevel      @default(NORMAL)
+    status       RequestStatus     @default(PENDING)
+    details      String?
+    responses    RequestResponse[]
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
+
+    @@index([bloodGroup, status, district])
+}
