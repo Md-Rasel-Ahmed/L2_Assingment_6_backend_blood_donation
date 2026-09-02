@@ -39,7 +39,27 @@ const singup = async(payload:ISingup)=>{
     })
     return createUser
 }
+const login =async (payload:any)=>{
+    
+    const isExistUser=await prisma.user.findUnique({
+        where:{
+            email:payload.email
+        }
+    })
+    if(!isExistUser){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+    }
+
+    const matchPassword=await bcrypt.compare(payload.password,isExistUser.password!)
+
+    if(!matchPassword){
+        throw new AppError(httpStatus.BAD_REQUEST,"Password Did Not Match")
+    }
+
+
+}
 
 export const AuthService ={
-    singup
+    singup,
+    login
 }

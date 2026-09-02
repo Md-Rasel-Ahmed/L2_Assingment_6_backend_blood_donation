@@ -14,7 +14,18 @@ const singup=catchAsync(async(req:Request,res:Response)=>{
     data:result
    })
 })
+const login=catchAsync(async(req:Request,res:Response)=>{
+    const payload=req.body
+  const result=await AuthService.login(payload)
+   sendResponse(res,{
+    success:true,
+    message:"User Login Successfull",
+    statusCode:httpStatus.OK,
+    data:result
+   })
+})
 
 export const AuthController={
-    singup
+    singup,
+    login
 }
