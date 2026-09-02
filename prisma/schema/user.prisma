@@ -1,0 +1,20 @@
+model User {
+    id            String     @id @default(ulid())
+    name          String?
+    email         String     @unique
+    emailVerified Boolean    @default(false)
+    isDeleted     Boolean    @default(false)
+    status        UserStatus @default(ACTIVE)
+    role          Role       @default(PATIENT)
+    phone         String?
+    district      String?
+    upazila       String?
+    address       String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    donor Donor?
+
+    @@map("users")
+}

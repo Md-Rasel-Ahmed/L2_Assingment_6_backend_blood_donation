@@ -1,0 +1,36 @@
+enum Role {
+    ADMIN
+    PATIENT
+    DONOR
+}
+
+enum UserStatus {
+    ACTIVE
+    SUSPENDED
+    PENDING_VERIFICATION
+}
+
+enum RequestStatus {
+    PENDING
+    ACCEPTED
+    FULFILLED
+    CANCELLED
+    EXPIRED
+}
+
+enum UrgencyLevel {
+    NORMAL
+    CRITICAL
+    EMERGENCY
+}
+
+enum BloodGroup {
+    A_POSITIVE
+    A_NEGATIVE
+    B_POSITIVE
+    B_NEGATIVE
+    AB_POSITIVE
+    AB_NEGATIVE
+    O_POSITIVE
+    O_NEGATIVE
+}
