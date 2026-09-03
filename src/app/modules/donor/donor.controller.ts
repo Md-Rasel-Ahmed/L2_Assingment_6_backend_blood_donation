@@ -28,9 +28,35 @@ const acceptedRequest = catchAsync(async(req:Request,res:Response)=>{
          data:data
     })
 })
+const getMyDonationHistories = catchAsync(async(req:Request,res:Response)=>{
+    
+    const user=req.user!
+    const data=await DonorService.getMyDonationHistories(user)
+    sendResponse(res,{
+         statusCode:httpStatus.OK,
+         success:true,
+         message:"All Donation History Retrived Successfull",
+         data:data
+    })
+})
+const updateAvailability = catchAsync(async(req:Request,res:Response)=>{
+    
+    const id=req.params.id
+    const user=req.user!
+    const payload=req.body
+    const data=await DonorService.updateAvailability(id as string,payload,user)
+    sendResponse(res,{
+         statusCode:httpStatus.CREATED,
+         success:true,
+         message:"Availablity Update Successfull",
+         data:data
+    })
+})
 
 
 export const DonorController={
     acceptedRequest,
-    createDonorProfile
+    getMyDonationHistories,
+    createDonorProfile,
+    updateAvailability
 }

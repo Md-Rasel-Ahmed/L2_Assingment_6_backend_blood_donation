@@ -34,12 +34,12 @@ const createDonorProfile=async(payload:ICreateDonor,user:IRequestUser)=>{
     return donorProfile
 }
 
-const getMyDonationHistories=async(payload:any)=>{
+const getMyDonationHistories=async(user:IRequestUser)=>{
 
 
     const isExistDonor=await prisma.user.findUnique({
         where:{
-            email:payload.email,
+            email:user.email,
             role:Role.DONOR
         }
     })
@@ -61,7 +61,7 @@ const getMyDonationHistories=async(payload:any)=>{
 
 }
 
-const updateAvailability=async(payload:any,user:IRequestUser)=>{
+const updateAvailability=async(id:string,payload:{isAvailable:boolean},user:IRequestUser)=>{
     const isExistDonor=await prisma.user.findUnique({
         where:{
             email:user.email,
@@ -78,7 +78,7 @@ const updateAvailability=async(payload:any,user:IRequestUser)=>{
 
         // donor cannot update availabilty last donation date gather then or equal 3 month 
 
-     if(payload.status===true){
+     if(payload.isAvailable===true){
  const targetDate=isExistDonor.donor?.lastDonatedAt
     if(!targetDate){
         throw new AppError(httpStatus.BAD_REQUEST,"Last Donation Date Is Required!")
@@ -94,7 +94,7 @@ const updateAvailability=async(payload:any,user:IRequestUser)=>{
 
     await prisma.donor.update({
         where:{
-            id:payload.id
+            id:id
         },
         data:{
             isAvailable:true
@@ -103,9 +103,9 @@ const updateAvailability=async(payload:any,user:IRequestUser)=>{
 
      }
      
-     if(payload.status===false){
+     if(payload.isAvailable===false){
         await prisma.donor.update({
-            where:{id:payload.id},
+            where:{id:id},
             data:{isAvailable:false}
         })
      }
