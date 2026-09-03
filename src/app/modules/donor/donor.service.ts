@@ -111,7 +111,7 @@ const updateAvailability=async(id:string,payload:{isAvailable:boolean},user:IReq
      }
 }
 
-const updateDonationProfile=async(paylaod:any,user:IRequestUser)=>{
+const updateDonationProfile=async(paylaod:ICreateDonor,user:IRequestUser)=>{
 const isExistDonor=await prisma.user.findUnique({
         where:{
             email:user.email,
