@@ -20,7 +20,20 @@ const updateStatus=catchAsync(async(req:Request,res:Response)=>{
 
     const payload=req.body
     const user=req.user!
-    const data=await PatientService.createBloodRequest(payload,user)
+    const data=await PatientService.updateStatus(payload,user)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"Blood Request Status Update Successfull",
+ data:data
+      })
+})
+const updateRequest=catchAsync(async(req:Request,res:Response)=>{
+
+    const payload=req.body
+    const user=req.user!
+    const id=req.params.id
+    const data=await PatientService.updateRequest(id as string,payload,user)
       sendResponse(res,{
  success:true,
  statusCode:httpStatus.OK,
@@ -31,5 +44,6 @@ const updateStatus=catchAsync(async(req:Request,res:Response)=>{
 
 export const PatientController ={
     createBloodRequest,
-    updateStatus
+    updateStatus,
+    updateRequest
 }

@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import { IRequestUser } from "../user/user.interface"
 import httpStatus from "http-status"
-import { ICreateBloodRequest } from "./patient.interface"
+import { ICreateBloodRequest, IUpdateBloodRequest } from "./patient.interface"
 
 const createBloodRequest =async (payload:ICreateBloodRequest,user:IRequestUser)=>{
     const existPatient=await prisma.user.findUnique({
@@ -50,7 +50,7 @@ const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
     }
     const isExistBloodReq=await prisma.bloodRequest.findUnique({
         where:{
-            patientId:existPatient.id
+            id:payload.id
         }
     })
      if(!isExistBloodReq){
@@ -78,7 +78,7 @@ const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
 return updateBloodRequest
 }
 
-const updateRequest=async(payload:any,user:IRequestUser)=>{
+const updateRequest=async(id:string,payload:IUpdateBloodRequest,user:IRequestUser)=>{
       const existPatient=await prisma.user.findUnique({
         where:{
             email:user.email,
@@ -89,7 +89,7 @@ const updateRequest=async(payload:any,user:IRequestUser)=>{
     }
     const isExistBloodReq=await prisma.bloodRequest.findUnique({
         where:{
-            patientId:existPatient.id
+            id,
         },
         include:{
             responses:true

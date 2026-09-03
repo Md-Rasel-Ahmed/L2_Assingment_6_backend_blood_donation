@@ -13,7 +13,9 @@ export const globalErrorHandler=async (err:any,req:Request,res:Response,next:Nex
 	 errorMessage=err.issues[0].message
      console.log(err.issues[0].message);
    }
-
+if (config.node_env === "development") {
+		console.log("Error from Global Error Handler", err);
+	}
 	if (err instanceof Prisma.PrismaClientValidationError) {
 		statusCode = httpStatus.BAD_REQUEST;
 		errorMessage = "You have provided incorrect field type or missing fields";

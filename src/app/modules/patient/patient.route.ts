@@ -7,5 +7,6 @@ const route=Router()
 
 route.post("/bloodRequiest",auth("PATIENT"),PatientController.createBloodRequest)
 route.patch("/bloodRequiest",auth("PATIENT"),PatientController.updateStatus)
+route.patch("/bloodRequiest/:id",auth("PATIENT"),PatientController.updateRequest)
 
 export const PatientRoute=route
