@@ -169,7 +169,7 @@ const getAllBloodRequest=async(query:Record<string,any>,user:IRequestUser)=>{
 
 }
 
-const getBloodRequestById=async(id:string,user:IRequestUser)=>{
+const getBloodRequestResponseById=async(id:string,user:IRequestUser)=>{
     const existPatient=await prisma.user.findUnique({
         where:{
             email:user.email,
@@ -178,21 +178,22 @@ const getBloodRequestById=async(id:string,user:IRequestUser)=>{
     if(!existPatient || existPatient.isDeleted){
         throw new AppError(httpStatus.NOT_FOUND,"Patient Profile Not Founded!")
     }
-    const getBloodReqById=await prisma.bloodRequest.findUnique({
+    const getBloodReqResById=await prisma.bloodRequest.findUnique({
         where:{
             id
         },
         include:{
             responses:{
                 include:{
-                    donor:true
+                    donor:true,
+                    request:true
                 }
             }
         
         }
     })
    
-    return getBloodReqById
+    return getBloodReqResById
 
 
 }
@@ -202,5 +203,5 @@ export const PatientService={
     updateStatus,
     updateRequest,
     getAllBloodRequest,
-    getBloodRequestById
+    getBloodRequestResponseById
 }
