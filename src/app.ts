@@ -11,6 +11,7 @@ import config from "./app/config";
 import { AuthRoute } from "./app/modules/auth/auth.route";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import { PatientRoute } from "./app/modules/patient/patient.route";
+import { DonorRoute } from "./app/modules/donor/donor.route";
 
 const app: Application = express();
 
@@ -31,6 +32,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth",AuthRoute)
 app.use("/api/v1/patient",PatientRoute)
+app.use("/api/v1/donor",DonorRoute)
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

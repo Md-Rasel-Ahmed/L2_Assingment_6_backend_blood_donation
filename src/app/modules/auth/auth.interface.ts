@@ -6,6 +6,8 @@ export interface ISingup {
   district?:string,
   upazila?:string,
   address?:string
-  
-
+}
+export interface Ilogin {
+  email:string,
+  password:string
 }

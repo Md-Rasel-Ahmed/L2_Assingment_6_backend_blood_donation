@@ -37,7 +37,6 @@ const createBloodRequest =async (payload:any,user:IRequestUser)=>{
 return createBloodRequest
 }
 
-
 const updateStatus=async(payload:any,user:IRequestUser)=>{
       const converPayloadStatus=payload.status.toUpperCase()
     const existPatient=await prisma.user.findUnique({
@@ -77,7 +76,6 @@ const updateStatus=async(payload:any,user:IRequestUser)=>{
     })
 return updateBloodRequest
 }
-
 
 const updateRequest=async(payload:any,user:IRequestUser)=>{
       const existPatient=await prisma.user.findUnique({
@@ -198,7 +196,11 @@ const getBloodRequestById=async(id:string,user:IRequestUser)=>{
 
 
 }
+
 export const PatientService={
     createBloodRequest,
-    updateStatus
+    updateStatus,
+    updateRequest,
+    getAllBloodRequest,
+    getBloodRequestById
 }

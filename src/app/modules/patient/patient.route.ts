@@ -2,6 +2,6 @@ import { Router } from "express";
 
 const route=Router()
 
-route.post("/bloodRequiest")
+route.post("/bloodRequiest",()=>{})
 
 export const PatientRoute=route

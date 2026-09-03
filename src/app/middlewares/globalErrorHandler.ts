@@ -2,11 +2,17 @@ import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import httpStatus from "http-status"
 import { Prisma } from "../../generated/prisma/client";
 import config from "../config";
+import { ZodError } from "zod";
 export const globalErrorHandler=async (err:any,req:Request,res:Response,next:NextFunction)=>{
    let statusCode=err.statusCode || httpStatus.INTERNAL_SERVER_ERROR
    let errorMessage=err.message || "Something Went Wrong!"
    let errorName = err.name || "Something Went Wrong!"
 
+   if(err instanceof ZodError){
+     statusCode = httpStatus.BAD_REQUEST
+	 errorMessage=err.issues[0].message
+     console.log(err.issues[0].message);
+   }
 
 	if (err instanceof Prisma.PrismaClientValidationError) {
 		statusCode = httpStatus.BAD_REQUEST;

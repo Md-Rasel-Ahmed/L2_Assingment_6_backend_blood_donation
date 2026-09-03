@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import httpStatus from "http-status"
-import { ISingup } from "./auth.interface"
+import { Ilogin, ISingup } from "./auth.interface"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { createToken } from "../../utils/jwtHelpers"
@@ -41,7 +41,7 @@ const singup = async(payload:ISingup)=>{
     })
     return createUser
 }
-const login =async (payload:any)=>{
+const login =async (payload:Ilogin)=>{
     
     const isExistUser=await prisma.user.findUnique({
         where:{
