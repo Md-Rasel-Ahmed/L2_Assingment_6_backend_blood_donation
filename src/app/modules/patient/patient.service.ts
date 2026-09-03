@@ -108,6 +108,8 @@ const updateRequest=async(id:string,payload:IUpdateBloodRequest,user:IRequestUse
         },
         data:{
             ...payload
+        },include:{
+            responses:true
         }
     })
     return updateBloodRequest
@@ -149,7 +151,7 @@ const getAllBloodRequest=async(query:Record<string,any>,user:IRequestUser)=>{
         skip,
         orderBy,
         include:{
-            patient:{
+            responses:{
                 include:{
                     donor:true
                 }

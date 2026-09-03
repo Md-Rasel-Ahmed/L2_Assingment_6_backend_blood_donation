@@ -28,6 +28,19 @@ const updateStatus=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
+const getAllBloodRequest=catchAsync(async(req:Request,res:Response)=>{
+
+    const query=req.query
+    const user=req.user!
+    
+    const data=await PatientService.getAllBloodRequest(query,user)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"All Blood Requested Retrived Successfull",
+ data:data
+      })
+})
 const updateRequest=catchAsync(async(req:Request,res:Response)=>{
 
     const payload=req.body
@@ -41,9 +54,23 @@ const updateRequest=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
+const getBloodRequestResponseById=catchAsync(async(req:Request,res:Response)=>{
+
+    const user=req.user!
+    const id=req.params.id
+    const data=await PatientService.getBloodRequestResponseById(id as string,user)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"Blood Request Retrived Successfull",
+ data:data
+      })
+})
 
 export const PatientController ={
     createBloodRequest,
     updateStatus,
-    updateRequest
+    updateRequest,
+    getAllBloodRequest,
+    getBloodRequestResponseById
 }
