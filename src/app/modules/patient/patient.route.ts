@@ -1,7 +1,11 @@
 import { Router } from "express";
+import { PatientController } from "./patient.controller";
+import { auth } from "../../middlewares/auth";
+import { Role } from "../../../generated/prisma/enums";
 
 const route=Router()
 
-route.post("/bloodRequiest",()=>{})
+route.post("/bloodRequiest",auth("PATIENT"),PatientController.createBloodRequest)
+route.patch("/bloodRequiest",auth("PATIENT"),PatientController.updateStatus)
 
 export const PatientRoute=route

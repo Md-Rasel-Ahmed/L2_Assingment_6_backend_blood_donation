@@ -4,8 +4,9 @@ import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import { IRequestUser } from "../user/user.interface"
 import httpStatus from "http-status"
+import { ICreateBloodRequest } from "./patient.interface"
 
-const createBloodRequest =async (payload:any,user:IRequestUser)=>{
+const createBloodRequest =async (payload:ICreateBloodRequest,user:IRequestUser)=>{
     const existPatient=await prisma.user.findUnique({
         where:{
             email:user.email,
@@ -19,14 +20,14 @@ const createBloodRequest =async (payload:any,user:IRequestUser)=>{
         data:{
             patientId:existPatient.id,
             bloodGroup:BloodGroup.AB_NEGATIVE,
-            district:"",
-            hospitalAddr:"",
-            hospitalName:"",
-            neededBy:"",
-            patientName:"",
-            upazila:"",
-            bagsNeeded:2,
-            details:"",
+            district:payload.district,
+            hospitalAddr:payload.hospitalAddr,
+            hospitalName:payload.hospitalName,
+            neededBy:payload.neededBy,
+            patientName:payload.patientName,
+            upazila:payload.upazila,
+            bagsNeeded:payload.bagsNeeded,
+            details:payload.details,
             urgency:UrgencyLevel.NORMAL
         },
         include:{
@@ -37,7 +38,7 @@ const createBloodRequest =async (payload:any,user:IRequestUser)=>{
 return createBloodRequest
 }
 
-const updateStatus=async(payload:any,user:IRequestUser)=>{
+const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
       const converPayloadStatus=payload.status.toUpperCase()
     const existPatient=await prisma.user.findUnique({
         where:{
@@ -57,7 +58,7 @@ const updateStatus=async(payload:any,user:IRequestUser)=>{
     }
     
     if(isExistBloodReq.status===RequestStatus.CANCELLED){
-        throw new AppError(httpStatus.FORBIDDEN,"Your Blood Request Already Has Canceled Cannot Update!")
+        throw new AppError(httpStatus.BAD_REQUEST,"Your Blood Request Already Has Canceled Cannot Update!")
     }
     if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus!==RequestStatus.ACCEPTED){
         throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Status Must Be ACCEPTED")

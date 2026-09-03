@@ -1,6 +1,6 @@
 model BloodRequest {
     id        String @id @default(uuid())
-    patientId String @unique
+    patientId String
     patient   User   @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
     patientName  String

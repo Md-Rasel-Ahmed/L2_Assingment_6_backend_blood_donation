@@ -36,8 +36,9 @@ export const auth =(...requiredRole:Role[])=>{
     if (!verifiedToken.success) {
 			throw new AppError(httpStatus.UNAUTHORIZED, verifiedToken.message || "Invalid Or Expired Token");
 		}
-    const {role,userId,email}=verifiedToken as JwtPayload
-    if(requiredRole.length>0 && !requiredRole.includes(role)){
+    const {role,userId,email}=verifiedToken.data?.data as JwtPayload
+	console.log(role);
+    if(requiredRole.length&& !requiredRole.includes(role)){
         throw new AppError(
 				httpStatus.FORBIDDEN,
 				"Forbidden. You don't have permission to access this resource.",

@@ -16,7 +16,20 @@ const createBloodRequest=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
+const updateStatus=catchAsync(async(req:Request,res:Response)=>{
+
+    const payload=req.body
+    const user=req.user!
+    const data=await PatientService.createBloodRequest(payload,user)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"Blood Request Update Successfull",
+ data:data
+      })
+})
 
 export const PatientController ={
-    createBloodRequest
+    createBloodRequest,
+    updateStatus
 }

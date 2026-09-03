@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createUserZodSchema } from "./auth.validation";
+import { createUserZodSchema, loginUserZodSchema } from "./auth.validation";
 
 const route=Router()
 
 route.post("/singup",validateRequest(createUserZodSchema),AuthController.singup)
-route.post("/login",AuthController.login)
+route.post("/login",validateRequest(loginUserZodSchema),AuthController.login)
 
 export const AuthRoute=route
