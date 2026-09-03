@@ -4,6 +4,18 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status"
 import { DonorService } from "./donor.service";
 
+const createDonorProfile = catchAsync(async(req:Request,res:Response)=>{
+    
+    const payload=req.body
+    const user=req.user!
+    const data=await DonorService.createDonorProfile(payload,user)
+    sendResponse(res,{
+         statusCode:httpStatus.CREATED,
+         success:true,
+         message:"Donor Profile Create Successfull",
+         data:data
+    })
+})
 const acceptedRequest = catchAsync(async(req:Request,res:Response)=>{
     
     const id=req.params.id
@@ -19,5 +31,6 @@ const acceptedRequest = catchAsync(async(req:Request,res:Response)=>{
 
 
 export const DonorController={
-    acceptedRequest
+    acceptedRequest,
+    createDonorProfile
 }

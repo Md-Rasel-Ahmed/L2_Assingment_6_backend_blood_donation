@@ -4,7 +4,35 @@ import { AppError } from "../../utils/AppError"
 import httpStatus from "http-status"
 import { IRequestUser } from "../user/user.interface"
 import { subMonths, isBefore } from 'date-fns';
+import { ICreateDonor } from "./donor.interface"
 
+const createDonorProfile=async(payload:ICreateDonor,user:IRequestUser)=>{
+    const isExistDonor=await prisma.user.findUnique({
+        where:{
+            email:user.email,
+            role:Role.DONOR
+        },include:{donor:true}
+    })
+
+    if(!isExistDonor || isExistDonor.isDeleted){
+        throw new AppError(httpStatus.NOT_FOUND,"Donor Profile Not Founded!")
+    }
+    if(isExistDonor.donor?.userId===isExistDonor.id){
+        throw new AppError(httpStatus.BAD_REQUEST,"You Have Already Donor Profile")
+    }
+    const donorProfile=await prisma.donor.create({
+        data:{
+           bloodGroup:payload.bloodGroup,
+           userId:isExistDonor.id,
+           lastDonatedAt:payload.lastDonatedAt,
+           totalDonations:payload.totalDonations
+        },
+        include:{
+            user:true
+        }
+    })
+    return donorProfile
+}
 
 const getMyDonationHistories=async(payload:any)=>{
 
@@ -121,10 +149,35 @@ const acceptedRequest=async(id:string,user:IRequestUser)=>{
     })
  
     if(!isExistDonor || isExistDonor.isDeleted){
-        throw new AppError(httpStatus.NOT_FOUND,"Donor Profile Not Founded!")
+        throw new AppError(httpStatus.NOT_FOUND,"User Profile Not Founded!")
     }
+
+  const findRequested=await prisma.bloodRequest.findUnique({
+    where:{id},include:{responses:true}
+})
+
+//    check is fullfield or not blood Requested status
+if(findRequested?.status===RequestStatus.FULFILLED){
+       throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Already Fulfilled")
+  }
+
+  if(!isExistDonor.donor?.userId){
+        throw new AppError(httpStatus.BAD_REQUEST,"You Don,t Have Donor Profile First Create Donor Profile")
+
+  }
+
+    const isAlreadyApplied=findRequested?.responses.find(r=>r.donorId===isExistDonor.id)
+    
+   if(isAlreadyApplied){
+    throw new AppError(httpStatus.BAD_REQUEST,"Alredy Applied On This Request")
+   }
+  
+//    Check Blood group same or not
+ if(isExistDonor.donor?.bloodGroup!==findRequested?.bloodGroup){
+    throw new AppError(httpStatus.BAD_REQUEST,"Your Blood Group And Patient Blood Group Is Not Same")
+ }
 // check last donation date
-const targetDate=isExistDonor.donor?.lastDonatedAt
+   const targetDate=isExistDonor.donor?.lastDonatedAt
     if(!targetDate){
         throw new AppError(httpStatus.BAD_REQUEST,"Last Donation Date Is Required!")
     }
@@ -137,15 +190,6 @@ const targetDate=isExistDonor.donor?.lastDonatedAt
         throw new AppError(httpStatus.FORBIDDEN,"Your Last Donation Must Be Gratter Then Or Equel 3 Month")
     }
    
-
-//    check is fullfield or not blood Requested status
-  const findRequested=await prisma.bloodRequest.findUnique({
-     where:{id}
-  })
-  if(findRequested?.status===RequestStatus.FULFILLED){
-       throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Already Fulfilled")
-  }
-    
   const acceptRequest=await prisma.requestResponse.create({
     data:{
         donorId:isExistDonor.id,
@@ -159,5 +203,6 @@ export const DonorService={
     getMyDonationHistories,
     updateAvailability,
     updateDonationProfile,
-    acceptedRequest
+    acceptedRequest,
+    createDonorProfile
 }

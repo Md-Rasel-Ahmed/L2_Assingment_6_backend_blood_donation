@@ -38,7 +38,8 @@ const singup = async(payload:ISingup)=>{
             address,
             district,
             name,
-            upazila
+            upazila,
+
         },
         omit:{
             password:true
