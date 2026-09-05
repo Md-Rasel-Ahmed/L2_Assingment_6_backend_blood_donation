@@ -199,8 +199,34 @@ if(findRequested?.status===RequestStatus.FULFILLED){
   
 }
 
+const getActiveMatchingRequested=async(user:IRequestUser)=>{
+     const isExistDonor=await prisma.user.findUnique({
+        where:{
+            email:user.email,
+            role:Role.DONOR
+        },
+        include:{
+            donor:true
+        }
+    })
+ 
+    if(!isExistDonor || isExistDonor.isDeleted){
+        throw new AppError(httpStatus.NOT_FOUND,"User Profile Not Founded!")
+    }
+
+    const matchedRequest=await prisma.bloodRequest.findMany({
+        where:{
+           district:isExistDonor.district as string,
+           bloodGroup:isExistDonor.donor?.bloodGroup,
+           status:"ACCEPTED"
+        }
+    })
+return matchedRequest
+}
+
 export const DonorService={
     getMyDonationHistories,
+    getActiveMatchingRequested,
     updateAvailability,
     updateDonationProfile,
     acceptedRequest,

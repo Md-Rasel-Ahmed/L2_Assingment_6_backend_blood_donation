@@ -65,6 +65,17 @@ const updateDonationProfile = catchAsync(async(req:Request,res:Response)=>{
          data:data
     })
 })
+const getActiveMatchingRequested = catchAsync(async(req:Request,res:Response)=>{
+    
+    const user=req.user!
+    const data=await DonorService.getActiveMatchingRequested(user)
+    sendResponse(res,{
+         statusCode:httpStatus.CREATED,
+         success:true,
+         message:"Matching Blood Request Retrived Successfull",
+         data:data
+    })
+})
 
 
 export const DonorController={
@@ -72,5 +83,6 @@ export const DonorController={
     getMyDonationHistories,
     createDonorProfile,
     updateAvailability,
-    updateDonationProfile
+    updateDonationProfile,
+    getActiveMatchingRequested
 }
