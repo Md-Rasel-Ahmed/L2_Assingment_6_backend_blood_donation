@@ -12,6 +12,4 @@ route.post("/sent-otp",AuthController.sendOtp)
 route.post("/forgot-password",AuthController.forgotPassword)
 route.post("/reset-password",AuthController.resetPassword)
 
-
-
 export const AuthRoute=route

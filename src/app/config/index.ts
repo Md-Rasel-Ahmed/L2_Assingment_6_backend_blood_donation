@@ -17,6 +17,11 @@ export default {
 	radis_password:process.env.REDIS_PASSWORD,
 	radis_name:process.env.REDIS_NAME,
 	smtp_password:process.env.SMTP_PASSWORD,
-	smtp_username:process.env.SMTP_USERNAME
+	smtp_username:process.env.SMTP_USERNAME,
+	bkash_base_url:process.env.BKASH_BASE_RUL!,
+	bkash_username:process.env.BKASH_USERNAME!,
+	bkash_password:process.env.BKASH_PASSWORD!,
+	bkash_app_key:process.env.BKASH_APP_KEY!,
+	bkash_app_secret_key:process.env.BKASH_SECRET_KEY!,
 
 };
