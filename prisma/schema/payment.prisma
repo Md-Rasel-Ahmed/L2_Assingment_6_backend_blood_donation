@@ -1,13 +1,19 @@
 model Payment {
-    id            String        @id @default(uuid())
-    userId        String
-    user          User          @relation(fields: [userId], references: [id])
-    amount        Decimal
-    currency      String        @default("BDT")
-    paymentMethod PaymentMethod
-    transactionId String?       @unique
-    status        PaymentStatus @default(PENDING)
+    id                    String        @id @default(uuid())
+    status                PaymentStatus @default(PENDING)
+    paymentID             String?       @unique
+    paymentCreateTime     String?
+    paymentGateway        String        @default("Bkash")
+    merchantInvoiceNumber String?
+    paidAT                String?
+    gatewayResponse       Json?
+    payerReference        String?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    amount   Decimal  @db.Decimal(10, 2)
+    currency String   @default("BDT")
+    trxID    String?
+    createAT DateTime @default(now())
+    updateAt DateTime @updatedAt
+    user     User?    @relation(fields: [userId], references: [id])
+    userId   String?
 }

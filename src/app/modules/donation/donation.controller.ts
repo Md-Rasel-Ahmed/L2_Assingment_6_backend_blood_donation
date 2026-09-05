@@ -6,7 +6,7 @@ import { DonationService } from "./donation.service"
 
 const createDonation = catchAsync(async(req:Request,res:Response)=>{
     const user=req.user!
-    const data=await DonationService.createDonation(user)
+    const data=await DonationService.createDonationPayment(user)
     sendResponse(res,{
          statusCode:httpStatus.CREATED,
          success:true,
@@ -18,13 +18,8 @@ const createDonation = catchAsync(async(req:Request,res:Response)=>{
 })
 const bkashCallback = catchAsync(async(req:Request,res:Response)=>{
     const query=req.query
-    const data=await DonationService.paymentCallback(query)
-    sendResponse(res,{
-         statusCode:httpStatus.CREATED,
-         success:true,
-         message:"Payment Create  Successfull",
-         data:{data}
-    })
+    const {redirectURL}=await DonationService.paymentCallback(query)
+  res.redirect(redirectURL)
 })
 
 
