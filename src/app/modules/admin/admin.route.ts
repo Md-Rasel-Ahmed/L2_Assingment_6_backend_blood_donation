@@ -7,10 +7,10 @@ const route=Router()
 
 route.get("/allUsers",auth(Role.ADMIN),AdminController.getUsers)
 route.get("/allDonor",auth(Role.ADMIN),AdminController.getAllDonor)
-route.get("/allRequested",auth(Role.ADMIN),AdminController.getAllRequest)
+route.get("/blood-requests",auth(Role.ADMIN),AdminController.getAllRequest)
 route.patch("/user-status",auth(Role.ADMIN),AdminController.updateUserStaus)
-route.delete("/allUsers/:email",auth(Role.ADMIN),AdminController.deleteUser)
-route.delete("/allRequested/:id",auth(Role.ADMIN),AdminController.deleteFakeBloodRequest)
+route.delete("/users/:email",auth(Role.ADMIN),AdminController.deleteUser)
+route.delete("/matching-requests/:id",auth(Role.ADMIN),AdminController.deleteFakeBloodRequest)
 
 
 export const AdminRoute=route

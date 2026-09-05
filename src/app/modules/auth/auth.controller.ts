@@ -9,7 +9,7 @@ const singup=catchAsync(async(req:Request,res:Response)=>{
     const result=await AuthService.singup(payload)
    sendResponse(res,{
     success:true,
-    message:"User Create Successfull",
+    message:"Sent Email Verification Code",
     statusCode:httpStatus.CREATED,
     data:result
    })

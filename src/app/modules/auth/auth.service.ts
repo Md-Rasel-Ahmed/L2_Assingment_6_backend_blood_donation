@@ -7,6 +7,11 @@ import bcrypt from "bcrypt"
 import { createToken } from "../../utils/jwtHelpers"
 import config from "../../config"
 import { Role, UserStatus } from "../../../generated/prisma/enums"
+import { redisClient } from "../../lib/radis"
+import { transporter } from "../../lib/nodemailer"
+import path from "node:path"
+import ejs from "ejs"
+
 
 const singup = async(payload:ISingup)=>{
     const {email,name="Jhon",phone="53663523535",address,district,role,password,upazila}=payload
@@ -46,7 +51,32 @@ const singup = async(payload:ISingup)=>{
             password:true
         }
     })
-    return createUser
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const key=`donation-singup-otp:${createUser.email}`
+//    send otp to radis
+  await redisClient.set(key,otp,{
+    expiration:{
+        type:"EX",
+        value:300
+    }
+ }
+ )
+
+ const tamplatepath=path.join(process.cwd(),"src/app/tamplates/send-otp.ejs")
+
+ const html=await ejs.renderFile(tamplatepath,{
+    name,
+    otp,
+    year: new Date().getFullYear(),
+ })
+ await transporter.sendMail({
+    from:"nhd305812@gmail.com",
+    to:createUser.email,
+    subject:"Your OTP Code",
+     html:html
+ })
+   
 }
 const login =async (payload:Ilogin)=>{
     
