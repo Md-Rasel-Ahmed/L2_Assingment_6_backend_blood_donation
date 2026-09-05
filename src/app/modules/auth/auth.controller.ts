@@ -51,9 +51,42 @@ const emailVerify=catchAsync(async(req:Request,res:Response)=>{
     data:{}
    })
 })
+const sendOtp=catchAsync(async(req:Request,res:Response)=>{
+   const paylaod=req.body
+  await AuthService.sendOtp(paylaod)
+   sendResponse(res,{
+    success:true,
+    message:"Email Verification Code Sent",
+    statusCode:httpStatus.OK,
+    data:{}
+   })
+})
+const forgotPassword=catchAsync(async(req:Request,res:Response)=>{
+   const user=req.user!
+  await AuthService.forgotPassword(user)
+   sendResponse(res,{
+    success:true,
+    message:"Email Verification Code Sent",
+    statusCode:httpStatus.OK,
+    data:{}
+   })
+})
+const resetPassword=catchAsync(async(req:Request,res:Response)=>{
+   const paylaod=req.body
+  await AuthService.resetPassword(paylaod)
+   sendResponse(res,{
+    success:true,
+    message:"Password Reset Successfull",
+    statusCode:httpStatus.OK,
+    data:{}
+   })
+})
 
 export const AuthController={
     singup,
     login,
+    sendOtp,
+    resetPassword,
+    forgotPassword,
     emailVerify
 }
