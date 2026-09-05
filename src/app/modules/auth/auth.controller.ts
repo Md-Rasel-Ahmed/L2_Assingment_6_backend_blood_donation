@@ -41,8 +41,19 @@ const login=catchAsync(async(req:Request,res:Response)=>{
     }
    })
 })
+const emailVerify=catchAsync(async(req:Request,res:Response)=>{
+   const paylaod=req.body
+  await AuthService.emailVerify(paylaod)
+   sendResponse(res,{
+    success:true,
+    message:"Email Verification Successfull",
+    statusCode:httpStatus.OK,
+    data:{}
+   })
+})
 
 export const AuthController={
     singup,
-    login
+    login,
+    emailVerify
 }

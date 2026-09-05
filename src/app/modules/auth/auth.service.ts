@@ -11,6 +11,7 @@ import { redisClient } from "../../lib/radis"
 import { transporter } from "../../lib/nodemailer"
 import path from "node:path"
 import ejs from "ejs"
+import { IRequestUser } from "../user/user.interface"
 
 
 const singup = async(payload:ISingup)=>{
@@ -78,6 +79,41 @@ const singup = async(payload:ISingup)=>{
  })
    
 }
+
+const emailVerify=async(payload:any)=>{
+    
+    const existUser=await prisma.user.findUnique({
+        where:{email:payload.email}
+    })
+
+    if(!existUser){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded With This Email")
+    }
+
+    // check otp valid or not
+    const key=`donation-singup-otp:${existUser.email}`
+    
+    const savedOtp=await redisClient.get(key)
+   console.log(payload.otp,savedOtp);
+    if(!savedOtp){
+        throw new AppError(httpStatus.BAD_REQUEST,"OTP expired or not found")
+    }
+
+  if (savedOtp !== payload.otp) {
+    throw new AppError(httpStatus.BAD_REQUEST,"Invalid OTP");
+  }
+
+  await redisClient.del(key)
+    await prisma.user.update({
+        where:{
+            email:existUser.email
+        },
+        data:{
+            emailVerified:true
+        }
+    })
+
+}
 const login =async (payload:Ilogin)=>{
     
     const isExistUser=await prisma.user.findUnique({
@@ -110,5 +146,6 @@ const login =async (payload:Ilogin)=>{
 
 export const AuthService ={
     singup,
-    login
+    login,
+    emailVerify
 }

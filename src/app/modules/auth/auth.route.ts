@@ -7,5 +7,6 @@ const route=Router()
 
 route.post("/singup",validateRequest(createUserZodSchema),AuthController.singup)
 route.post("/login",validateRequest(loginUserZodSchema),AuthController.login)
+route.post("/verify-email",AuthController.emailVerify)
 
 export const AuthRoute=route
