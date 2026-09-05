@@ -34,3 +34,16 @@ enum BloodGroup {
     O_POSITIVE
     O_NEGATIVE
 }
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum PaymentMethod {
+    BKASH
+    NAGAD
+    CARD
+}

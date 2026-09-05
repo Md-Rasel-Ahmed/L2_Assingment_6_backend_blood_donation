@@ -18,6 +18,8 @@ model User {
     donor      Donor?
     blodReuest BloodRequest[]
     response   RequestResponse[]
+    donation   Donation[]
+    payment    Payment[]
 
     @@map("users")
 }
