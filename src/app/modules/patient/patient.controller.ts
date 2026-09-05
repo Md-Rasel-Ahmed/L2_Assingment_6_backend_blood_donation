@@ -18,9 +18,10 @@ const createBloodRequest=catchAsync(async(req:Request,res:Response)=>{
 })
 const updateStatus=catchAsync(async(req:Request,res:Response)=>{
 
-    const payload=req.body
     const user=req.user!
-    const data=await PatientService.updateStatus(payload,user)
+    const id=req.params.id
+    const paylaod=req.body
+    const data=await PatientService.updateStatus(id as string,paylaod,user)
       sendResponse(res,{
  success:true,
  statusCode:httpStatus.OK,
@@ -28,7 +29,7 @@ const updateStatus=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
-const getAllBloodRequest=catchAsync(async(req:Request,res:Response)=>{
+const getMyBloodRequests=catchAsync(async(req:Request,res:Response)=>{
 
     const query=req.query
     const user=req.user!
@@ -67,10 +68,25 @@ const getBloodRequestResponseById=catchAsync(async(req:Request,res:Response)=>{
       })
 })
 
+const confirmDonation=catchAsync(async(req:Request,res:Response)=>{
+
+    const user=req.user!
+    const id=req.params.id
+    console.log(id);
+    const data=await PatientService.confirmDonation(id as string,user)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"Confirm Request Retrived Successfull",
+ data:data
+      })
+})
+
 export const PatientController ={
     createBloodRequest,
     updateStatus,
     updateRequest,
-    getAllBloodRequest,
-    getBloodRequestResponseById
+    getMyBloodRequests,
+    getBloodRequestResponseById,
+    confirmDonation
 }

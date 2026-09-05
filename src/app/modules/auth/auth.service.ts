@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { createToken } from "../../utils/jwtHelpers"
 import config from "../../config"
-import { Role } from "../../../generated/prisma/enums"
+import { Role, UserStatus } from "../../../generated/prisma/enums"
 
 const singup = async(payload:ISingup)=>{
     const {email,name="Jhon",phone="53663523535",address,district,role,password,upazila}=payload
@@ -34,6 +34,7 @@ const singup = async(payload:ISingup)=>{
             email:email,
             password:hashPassword,
             phone,
+            status:UserStatus.PENDING_VERIFICATION,
             role,
             address,
             district,

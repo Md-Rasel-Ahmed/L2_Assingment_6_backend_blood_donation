@@ -1,3 +1,4 @@
+import { RequestStatus, UserStatus } from "../../../generated/prisma/enums"
 import { BloodRequestWhereInput, DonorWhereInput, UserWhereInput } from "../../../generated/prisma/models"
 import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
@@ -158,15 +159,88 @@ const getAllRequest=async(query:Record<string,any>,user:IRequestUser)=>{
    }
 }
 
-const deleteFakeBloodRequested=async()=>{}
+const deleteUser=async(email:string,user:IRequestUser)=>{
+     const isExistAdmin=await prisma.user.findUnique({
+        where:{email:user.email}
+    })
 
-const deleteUser=async()=>{}
+    if(!isExistAdmin){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+    }
+
+    const findUser=await prisma.user.findUnique({
+        where:{
+email
+        }
+    })
+
+    if(findUser?.isDeleted){
+        throw new AppError(httpStatus.BAD_REQUEST,"The User Already Deleted")
+    }
+
+    await prisma.user.update({
+        where:{
+            email:findUser?.email
+        },data:{isDeleted:true}
+    })
+
+}
+
+const updateUserStaus=async(payload:{email:string,status:string},user:IRequestUser)=>{
+ const isExistAdmin=await prisma.user.findUnique({
+        where:{email:user.email}
+    })
+
+    if(!isExistAdmin){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+    }
+
+     const findUser=await prisma.user.findUnique({
+        where:{
+email:payload.email
+        }
+    })
+
+    if(findUser?.status==="ACTIVE" && payload.status!==UserStatus.SUSPENDED){
+        throw new AppError(httpStatus.BAD_REQUEST,"Status Must Be SUSPENDED To Update Active User")
+    }
+
+    await prisma.user.update({
+        where:{
+            email:payload.email
+        },data:{status:payload.status}
+    })
+}
+
+const deleteFakeBloodRequest=async(id:string,user:IRequestUser)=>{
+ const isExistAdmin=await prisma.user.findUnique({
+        where:{email:user.email}
+    })
+
+    if(!isExistAdmin){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+    }
+
+    const findBloodReq=await prisma.bloodRequest.findUnique({
+        where:{
+            id
+        }
+    })
+
+    if(!findBloodReq){
+        throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded")
+    }
+
+    await prisma.bloodRequest.delete({where:{id}})
+
+}
 
 
 export const AdminService={
+    getUsers,
     getAllDonor,
     getAllRequest,
-    
-    deleteFakeBloodRequested,
+    updateUserStaus,
+    deleteFakeBloodRequest,
     deleteUser
 }

@@ -38,8 +38,8 @@ const createBloodRequest =async (payload:ICreateBloodRequest,user:IRequestUser)=
 return createBloodRequest
 }
 
-const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
-      const converPayloadStatus=payload.status.toUpperCase()
+const updateStatus=async(id:string,payload:{status:string},user:IRequestUser)=>{
+    const converPayloadStatus=payload.status.toUpperCase() as RequestStatus
     const existPatient=await prisma.user.findUnique({
         where:{
             email:user.email,
@@ -50,8 +50,8 @@ const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
     }
     const isExistBloodReq=await prisma.bloodRequest.findUnique({
         where:{
-            id:payload.id
-        }
+            id:id
+        },include:{responses:true}
     })
      if(!isExistBloodReq){
         throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded!")
@@ -60,6 +60,11 @@ const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
     if(isExistBloodReq.status===RequestStatus.CANCELLED){
         throw new AppError(httpStatus.BAD_REQUEST,"Your Blood Request Already Has Canceled Cannot Update!")
     }
+    // if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus ===RequestStatus.CANCELLED){
+    //     if(isExistBloodReq.responses.length>0){
+    //         throw new AppError (httpStatus.BAD_REQUEST,"You Cannot Change Status Because Alrady More Then 1 Pepole Appiled!")
+    //     }
+    // }
     if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus!==RequestStatus.ACCEPTED){
         throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Status Must Be ACCEPTED")
     }
@@ -69,7 +74,7 @@ const updateStatus=async(payload:{id:string,status:string},user:IRequestUser)=>{
 
    const updateBloodRequest= await prisma.bloodRequest.update({
         where:{
-            id:payload.id
+            id:id
         },
         data:{
             status:converPayloadStatus
@@ -181,6 +186,14 @@ const getBloodRequestResponseById=async(id:string,user:IRequestUser)=>{
     if(!existPatient || existPatient.isDeleted){
         throw new AppError(httpStatus.NOT_FOUND,"Patient Profile Not Founded!")
     }
+      const isExistBloodReq=await prisma.bloodRequest.findUnique({
+        where:{
+            id:id
+        },include:{responses:true}
+    })
+     if(!isExistBloodReq){
+        throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded!")
+    }
     const getBloodReqResById=await prisma.bloodRequest.findUnique({
         where:{
             id
@@ -189,7 +202,7 @@ const getBloodRequestResponseById=async(id:string,user:IRequestUser)=>{
             responses:{
                 include:{
                     donor:true,
-                    request:true
+                  
                 }
             }
         
@@ -200,11 +213,59 @@ const getBloodRequestResponseById=async(id:string,user:IRequestUser)=>{
 
 
 }
+const confirmDonation=async(id:string,user:IRequestUser)=>{
+    const transactionResult=await prisma.$transaction(async (tx)=>{
+         const existPatient=await tx.user.findUnique({
+        where:{
+            email:user.email,
+        }
+    })
+    if(!existPatient || existPatient.isDeleted){
+        throw new AppError(httpStatus.NOT_FOUND,"Patient Profile Not Founded!")
+    }
+     const isExistDonor=await tx.donor.findUnique({where:{userId:id}})
+    if(!isExistDonor){
+        throw new AppError(httpStatus.NOT_FOUND,"Donor Profile Not Founded With This Id,Please Try Again")
+    }
 
+    if(isExistDonor.isAvailable===false){
+        throw new AppError (httpStatus.BAD_REQUEST,"Already Confirm Donation With This Donor")
+    }
+
+ await tx.donor.update({
+        where:{
+          userId:id
+        },
+        data:{
+            lastDonatedAt:new Date(),
+            totalDonations:{increment:1},
+            isAvailable:false
+        }
+    })
+    await tx.requestResponse.updateMany({
+        where:{
+            donorId:id
+        },data:{status:"COMPLETED"}
+    })
+
+    await tx.bloodRequest.update({
+        where:{
+         patientId:existPatient.id
+        },data:{
+            status:"FULFILLED"
+        }
+    })
+
+    })
+
+   
+   
+}
 export const PatientService={
     createBloodRequest,
     updateStatus,
     updateRequest,
     getAllBloodRequest,
-    getBloodRequestResponseById
+    getBloodRequestResponseById,
+    confirmDonation
 }
