@@ -60,13 +60,13 @@ const updateStatus=async(id:string,payload:{status:string},user:IRequestUser)=>{
     if(isExistBloodReq.status===RequestStatus.CANCELLED){
         throw new AppError(httpStatus.BAD_REQUEST,"Your Blood Request Already Has Canceled Cannot Update!")
     }
-    // if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus ===RequestStatus.CANCELLED){
-    //     if(isExistBloodReq.responses.length>0){
-    //         throw new AppError (httpStatus.BAD_REQUEST,"You Cannot Change Status Because Alrady More Then 1 Pepole Appiled!")
-    //     }
-    // }
-    if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus!==RequestStatus.ACCEPTED){
-        throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Status Must Be ACCEPTED")
+
+    if((isExistBloodReq.status===RequestStatus.ACCEPTED && converPayloadStatus === RequestStatus.CANCELLED) && isExistBloodReq.responses.length>0 ){
+         throw new AppError (httpStatus.BAD_REQUEST,"You Cannot Change Status Because Alrady More Then 1 Pepole Appiled!")
+    }
+
+    if(isExistBloodReq.status===RequestStatus.PENDING && converPayloadStatus===RequestStatus.ACCEPTED){
+        throw new AppError(httpStatus.FORBIDDEN,"You Cannot Update status ACCEPTED It Will Update Our Admin")
     }
     if(isExistBloodReq.status===RequestStatus.ACCEPTED && converPayloadStatus!==RequestStatus.FULFILLED){
         throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Status Must Be FULFILLED")
@@ -248,7 +248,7 @@ const confirmDonation=async(id:string,user:IRequestUser)=>{
         },data:{status:"COMPLETED"}
     })
 
-    await tx.bloodRequest.update({
+    await tx.bloodRequest.updateMany({
         where:{
          patientId:existPatient.id
         },data:{

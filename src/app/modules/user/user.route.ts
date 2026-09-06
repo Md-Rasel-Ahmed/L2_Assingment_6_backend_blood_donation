@@ -10,6 +10,6 @@ const route =Router()
 
 route.get("/get-me",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),UsersController.getMe)
 
-route.patch("/edit-me",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),upload.single("image"),validateRequest(updateUserDataSchema),UsersController.updateProfile)
+route.patch("/edit-me",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),upload.single("image"),UsersController.updateProfile)
 
 export const UserRouter=route

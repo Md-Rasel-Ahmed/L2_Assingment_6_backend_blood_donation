@@ -84,6 +84,19 @@ const deleteUser=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
+const verifyBloodReq=catchAsync(async(req:Request,res:Response)=>{
+
+    const user=req.user!
+    const id=req.params.id
+   await AdminService.deleteUser(id as string,user)
+
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"Blood Request Verify Successfull",
+ data:{}
+      })
+})
 
 export const AdminController={
 deleteUser,
@@ -91,5 +104,6 @@ deleteFakeBloodRequest,
 getAllDonor,
 getAllRequest,
 getUsers,
-updateUserStaus
+updateUserStaus,
+verifyBloodReq
 }

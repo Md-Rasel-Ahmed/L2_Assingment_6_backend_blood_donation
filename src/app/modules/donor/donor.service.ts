@@ -155,11 +155,15 @@ const acceptedRequest=async(id:string,user:IRequestUser)=>{
   const findRequested=await prisma.bloodRequest.findUnique({
     where:{id},include:{responses:true}
 })
-
+// check blood request pending or not
+if(findRequested?.status===RequestStatus.PENDING){
+    throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Is Not Verified Yet,Try After Accepted")
+}
 //    check is fullfield or not blood Requested status
 if(findRequested?.status===RequestStatus.FULFILLED){
        throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Already Fulfilled")
   }
+
 
   if(!isExistDonor.donor?.userId){
         throw new AppError(httpStatus.BAD_REQUEST,"You Don,t Have Donor Profile First Create Donor Profile")

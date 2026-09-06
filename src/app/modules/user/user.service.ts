@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import { IRequestUser } from "./user.interface"
 import httpStatus from "http-status"
+import { createAuditLog } from "../auditLog/audit.service"
 
 const getMe=async(user:IRequestUser)=>{
    const isExistUser=await prisma.user.findUnique({
@@ -26,6 +27,13 @@ return getMe
 }
 
 const udpateProfile=async(file:any,data:any,user:IRequestUser)=>{
+
+  const findUser=await prisma.user.findUnique({
+    where:{email:user.email}
+  })
+  if(!findUser || findUser.isDeleted){
+    throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+  }
     let imgurl=""
     let publicId=""
     if(file){
@@ -62,6 +70,13 @@ const udpateProfile=async(file:any,data:any,user:IRequestUser)=>{
         
     }
  })
+  await createAuditLog({
+        action:"Update",
+        description:"Update Profile",
+        entity:"Patient,Donor,Admin",
+        entityId:findUser.id,
+        
+    })
  return updateProfile
 }
 export const UsersService={

@@ -1,0 +1,12 @@
+model AuditLog {
+    id          String   @id @default(uuid())
+    userId      String
+    user        User     @relation(fields: [userId], references: [id])
+    action      String?
+    entity      String?
+    entityId    String?
+    description String?
+    createAT    DateTime @default(now())
+
+    @@map("auditLogs")
+}

@@ -2,6 +2,7 @@ import { RequestStatus, UserStatus } from "../../../generated/prisma/enums"
 import { BloodRequestWhereInput, DonorWhereInput, UserWhereInput } from "../../../generated/prisma/models"
 import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
+import { createAuditLog } from "../auditLog/audit.service"
 import { IRequestUser } from "../user/user.interface"
 import httpStatus from "http-status"
 
@@ -183,10 +184,16 @@ email
             email:findUser?.email
         },data:{isDeleted:true}
     })
-
+ await createAuditLog({
+        action:"Delete",
+        description:" Delete Fake And Unverified User",
+        entity:"Patient and Donor",
+        userId:isExistAdmin.id,
+        entityId:findUser?.id
+    })
 }
 
-const updateUserStaus=async(payload:{email:string,status:string},user:IRequestUser)=>{
+const updateUserStaus=async(payload:{email:string,status:UserStatus},user:IRequestUser)=>{
  const isExistAdmin=await prisma.user.findUnique({
         where:{email:user.email}
     })
@@ -232,9 +239,45 @@ const deleteFakeBloodRequest=async(id:string,user:IRequestUser)=>{
     }
 
     await prisma.bloodRequest.delete({where:{id}})
+    await createAuditLog({
+        action:"Delete",
+        description:"Fake Blood Request Delete",
+        entity:"Patient",
+        userId:isExistAdmin.id,
+        entityId:findBloodReq.id,
+    })
 
 }
 
+const verifyBloodReq=async(id:string,user:IRequestUser)=>{
+    const existUser=await prisma.user.findUnique({
+        where:{
+            email:user.email,
+            role:"ADMIN"
+        }
+    })
+
+    if(!existUser){
+        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
+    }
+
+    const exitsBloodReq=await prisma.bloodRequest.findUnique({
+        where:{
+            id:id
+        }
+    })
+
+    
+    if(!exitsBloodReq){
+        throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded")
+    }
+
+    await prisma.bloodRequest.update({
+        where:{
+            id:exitsBloodReq.id
+        },data:{status:"ACCEPTED"}
+    })
+}
 
 export const AdminService={
     getUsers,
@@ -242,5 +285,6 @@ export const AdminService={
     getAllRequest,
     updateUserStaus,
     deleteFakeBloodRequest,
-    deleteUser
+    deleteUser,
+    verifyBloodReq
 }

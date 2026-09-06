@@ -20,7 +20,7 @@ model User {
     donor      Donor?
     blodReuest BloodRequest[]
     response   RequestResponse[]
-    donation   Donation[]
+    audit      AuditLog[]
     payment    Payment[]
 
     @@map("users")
