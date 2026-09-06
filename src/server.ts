@@ -4,19 +4,18 @@ import { transporter } from "./app/lib/nodemailer";
 import { prisma } from "./app/lib/prisma";
 import { redisClient } from "./app/lib/radis";
 
-
 const PORT = config.port;
 
 const main = async () => {
 	try {
 		await prisma.$connect();
-       console.log("Database Connected Successfull");
+		console.log("Database Connected Successfull");
 
-	   await redisClient.connect()
-	   console.log("Radis Connected successfull");
+		await redisClient.connect();
+		console.log("Radis Connected successfull");
 
-	   await transporter.verify()
-	   console.log("Nodemailer Connected Successfull");
+		await transporter.verify();
+		console.log("Nodemailer Connected Successfull");
 		app.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`);
 		});

@@ -3,6 +3,8 @@ model User {
     name          String?
     email         String     @unique
     password      String?
+    provide       Provider   @default(CREDENTIALS)
+    googleId      String?    @default("")
     emailVerified Boolean    @default(false)
     isDeleted     Boolean    @default(false)
     status        UserStatus @default(ACTIVE)

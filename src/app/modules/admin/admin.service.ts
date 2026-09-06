@@ -1,290 +1,307 @@
-import { RequestStatus, UserStatus } from "../../../generated/prisma/enums"
-import { BloodRequestWhereInput, DonorWhereInput, UserWhereInput } from "../../../generated/prisma/models"
-import { prisma } from "../../lib/prisma"
-import { AppError } from "../../utils/AppError"
-import { createAuditLog } from "../auditLog/audit.service"
-import { IRequestUser } from "../user/user.interface"
-import httpStatus from "http-status"
+import { RequestStatus, UserStatus } from "../../../generated/prisma/enums";
+import type {
+	BloodRequestWhereInput,
+	DonorWhereInput,
+	UserWhereInput,
+} from "../../../generated/prisma/models";
+import { prisma } from "../../lib/prisma";
+import { AppError } from "../../utils/AppError";
+import { createAuditLog } from "../auditLog/audit.service";
+import type { IRequestUser } from "../user/user.interface";
+import httpStatus from "http-status";
 
-const getUsers=async(query:Record<string,any>,user:IRequestUser)=>{
-    const limit=query.limit?Number(query.limit):10
-       const page=query.page?Number(query.page):1
-       const skip=(page-1)*limit
-       const sortBy=query.sortBy?query.sortBy:"createdAt"
-       const sortOrder=query.sortOrder?query.sortOrder:"desc"
-       const andCondition:UserWhereInput[]=[]
+const getUsers = async (query: Record<string, any>, user: IRequestUser) => {
+	const limit = query.limit ? Number(query.limit) : 10;
+	const page = query.page ? Number(query.page) : 1;
+	const skip = (page - 1) * limit;
+	const sortBy = query.sortBy ? query.sortBy : "createdAt";
+	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+	const andCondition: UserWhereInput[] = [];
 
-    const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
- // serach 
-    if(query.searchTerm){
-        andCondition.push({
-            OR:[
-                {email:{contains:query.searchTerm,mode:"insensitive"}},
-                {address:{contains:query.searchTerm,mode:"insensitive"}},
-            ]
-        })
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
+	// serach
+	if (query.searchTerm) {
+		andCondition.push({
+			OR: [
+				{ email: { contains: query.searchTerm, mode: "insensitive" } },
+				{ address: { contains: query.searchTerm, mode: "insensitive" } },
+			],
+		});
+	}
 
-    
-    // filter by status 
-    if(query.status){
-        andCondition.push({status:query.status})
-    }
+	// filter by status
+	if (query.status) {
+		andCondition.push({ status: query.status });
+	}
 
-    const orderBy={
-        [sortBy]:sortOrder
-    }
+	const orderBy = {
+		[sortBy]: sortOrder,
+	};
 
-   const users=await prisma.user.findMany({
-    where:{AND:andCondition},
-    take:limit,
-    skip,
-    orderBy,
-    include:{blodReuest:true,donor:true,response:true}
-   })
-   const total=await prisma.user.count({where:{AND:andCondition}})
-   return {
-    data:users,
-    meta:{
-            page,
-            limit,
-            total,
-            totalPage:Math.ceil(total/limit)
-        }
-   }
-}
-const getAllDonor=async(query:Record<string,any>,user:IRequestUser)=>{
-     const limit=query.limit?Number(query.limit):10
-       const page=query.page?Number(query.page):1
-       const skip=(page-1)*limit
-       const sortBy=query.sortBy?query.sortBy:"createdAt"
-       const sortOrder=query.sortOrder?query.sortOrder:"desc"
-       const andCondition:DonorWhereInput[]=[]
+	const users = await prisma.user.findMany({
+		where: { AND: andCondition },
+		take: limit,
+		skip,
+		orderBy,
+		include: { blodReuest: true, donor: true, response: true },
+	});
+	const total = await prisma.user.count({ where: { AND: andCondition } });
+	return {
+		data: users,
+		meta: {
+			page,
+			limit,
+			total,
+			totalPage: Math.ceil(total / limit),
+		},
+	};
+};
+const getAllDonor = async (query: Record<string, any>, user: IRequestUser) => {
+	const limit = query.limit ? Number(query.limit) : 10;
+	const page = query.page ? Number(query.page) : 1;
+	const skip = (page - 1) * limit;
+	const sortBy = query.sortBy ? query.sortBy : "createdAt";
+	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+	const andCondition: DonorWhereInput[] = [];
 
-    const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-    
-    // filter by status 
-    if(query.bloodGroup){
-        andCondition.push({bloodGroup:query.bloodGroup})
-    }
+	// filter by status
+	if (query.bloodGroup) {
+		andCondition.push({ bloodGroup: query.bloodGroup });
+	}
 
-    const orderBy={
-        [sortBy]:sortOrder
-    }
+	const orderBy = {
+		[sortBy]: sortOrder,
+	};
 
-   const donors=await prisma.donor.findMany({
-    where:{AND:andCondition},
-    take:limit,
-    skip,
-    orderBy,
-    include:{user:true}
-   })
-   const total=await prisma.donor.count({where:{AND:andCondition}})
-   return {
-    data:donors,
-    meta:{
-            page,
-            limit,
-            total,
-            totalPage:Math.ceil(total/limit)
-        }
-   }
-}
+	const donors = await prisma.donor.findMany({
+		where: { AND: andCondition },
+		take: limit,
+		skip,
+		orderBy,
+		include: { user: true },
+	});
+	const total = await prisma.donor.count({ where: { AND: andCondition } });
+	return {
+		data: donors,
+		meta: {
+			page,
+			limit,
+			total,
+			totalPage: Math.ceil(total / limit),
+		},
+	};
+};
 
-const getAllRequest=async(query:Record<string,any>,user:IRequestUser)=>{
-      const limit=query.limit?Number(query.limit):10
-       const page=query.page?Number(query.page):1
-       const skip=(page-1)*limit
-       const sortBy=query.sortBy?query.sortBy:"createdAt"
-       const sortOrder=query.sortOrder?query.sortOrder:"desc"
-       const andCondition:BloodRequestWhereInput[]=[]
+const getAllRequest = async (
+	query: Record<string, any>,
+	user: IRequestUser,
+) => {
+	const limit = query.limit ? Number(query.limit) : 10;
+	const page = query.page ? Number(query.page) : 1;
+	const skip = (page - 1) * limit;
+	const sortBy = query.sortBy ? query.sortBy : "createdAt";
+	const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+	const andCondition: BloodRequestWhereInput[] = [];
 
-    const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-    // serach 
-    if(query.searchTerm){
-        andCondition.push({
-            OR:[
-                {patientName:{contains:query.searchTerm,mode:"insensitive"}},
-                {hospitalName:{contains:query.searchTerm,mode:"insensitive"}},
-            ]
-        })
-    }
-    // filter by status 
-    if(query.urgency){
-        andCondition.push({urgency:query.urgency})
-    }
-    if(query.status){
-        andCondition.push({status:query.status})
-    }
+	// serach
+	if (query.searchTerm) {
+		andCondition.push({
+			OR: [
+				{ patientName: { contains: query.searchTerm, mode: "insensitive" } },
+				{ hospitalName: { contains: query.searchTerm, mode: "insensitive" } },
+			],
+		});
+	}
+	// filter by status
+	if (query.urgency) {
+		andCondition.push({ urgency: query.urgency });
+	}
+	if (query.status) {
+		andCondition.push({ status: query.status });
+	}
 
-    const orderBy={
-        [sortBy]:sortOrder
-    }
+	const orderBy = {
+		[sortBy]: sortOrder,
+	};
 
-   const allRequest=await prisma.bloodRequest.findMany({
-    where:{AND:andCondition},
-    take:limit,
-    skip,
-    orderBy,
-    include:{patient:true,responses:true}
-   })
-   const total=await prisma.bloodRequest.count({where:{AND:andCondition}})
-   return {
-    data:allRequest,
-    meta:{
-            page,
-            limit,
-            total,
-            totalPage:Math.ceil(total/limit)
-        }
-   }
-}
+	const allRequest = await prisma.bloodRequest.findMany({
+		where: { AND: andCondition },
+		take: limit,
+		skip,
+		orderBy,
+		include: { patient: true, responses: true },
+	});
+	const total = await prisma.bloodRequest.count({
+		where: { AND: andCondition },
+	});
+	return {
+		data: allRequest,
+		meta: {
+			page,
+			limit,
+			total,
+			totalPage: Math.ceil(total / limit),
+		},
+	};
+};
 
-const deleteUser=async(email:string,user:IRequestUser)=>{
-     const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+const deleteUser = async (email: string, user: IRequestUser) => {
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-    const findUser=await prisma.user.findUnique({
-        where:{
-email
-        }
-    })
+	const findUser = await prisma.user.findUnique({
+		where: {
+			email,
+		},
+	});
 
-    if(findUser?.isDeleted){
-        throw new AppError(httpStatus.BAD_REQUEST,"The User Already Deleted")
-    }
+	if (findUser?.isDeleted) {
+		throw new AppError(httpStatus.BAD_REQUEST, "The User Already Deleted");
+	}
 
-    await prisma.user.update({
-        where:{
-            email:findUser?.email
-        },data:{isDeleted:true}
-    })
- await createAuditLog({
-        action:"Delete",
-        description:" Delete Fake And Unverified User",
-        entity:"Patient and Donor",
-        userId:isExistAdmin.id,
-        entityId:findUser?.id
-    })
-}
+	await prisma.user.update({
+		where: {
+			email: findUser?.email,
+		},
+		data: { isDeleted: true },
+	});
+	await createAuditLog({
+		action: "Delete",
+		description: " Delete Fake And Unverified User",
+		entity: "Patient and Donor",
+		userId: isExistAdmin.id,
+		entityId: findUser?.id,
+	});
+};
 
-const updateUserStaus=async(payload:{email:string,status:UserStatus},user:IRequestUser)=>{
- const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+const updateUserStaus = async (
+	payload: { email: string; status: UserStatus },
+	user: IRequestUser,
+) => {
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-     const findUser=await prisma.user.findUnique({
-        where:{
-email:payload.email
-        }
-    })
+	const findUser = await prisma.user.findUnique({
+		where: {
+			email: payload.email,
+		},
+	});
 
-    if(findUser?.status==="ACTIVE" && payload.status!==UserStatus.SUSPENDED){
-        throw new AppError(httpStatus.BAD_REQUEST,"Status Must Be SUSPENDED To Update Active User")
-    }
+	if (
+		findUser?.status === "ACTIVE" &&
+		payload.status !== UserStatus.SUSPENDED
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Status Must Be SUSPENDED To Update Active User",
+		);
+	}
 
-    await prisma.user.update({
-        where:{
-            email:payload.email
-        },data:{status:payload.status}
-    })
-}
+	await prisma.user.update({
+		where: {
+			email: payload.email,
+		},
+		data: { status: payload.status },
+	});
+};
 
-const deleteFakeBloodRequest=async(id:string,user:IRequestUser)=>{
- const isExistAdmin=await prisma.user.findUnique({
-        where:{email:user.email}
-    })
+const deleteFakeBloodRequest = async (id: string, user: IRequestUser) => {
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
 
-    if(!isExistAdmin){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-    const findBloodReq=await prisma.bloodRequest.findUnique({
-        where:{
-            id
-        }
-    })
+	const findBloodReq = await prisma.bloodRequest.findUnique({
+		where: {
+			id,
+		},
+	});
 
-    if(!findBloodReq){
-        throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded")
-    }
+	if (!findBloodReq) {
+		throw new AppError(httpStatus.NOT_FOUND, "Blood Request Not Founded");
+	}
 
-    await prisma.bloodRequest.delete({where:{id}})
-    await createAuditLog({
-        action:"Delete",
-        description:"Fake Blood Request Delete",
-        entity:"Patient",
-        userId:isExistAdmin.id,
-        entityId:findBloodReq.id,
-    })
+	await prisma.bloodRequest.delete({ where: { id } });
+	await createAuditLog({
+		action: "Delete",
+		description: "Fake Blood Request Delete",
+		entity: "Patient",
+		userId: isExistAdmin.id,
+		entityId: findBloodReq.id,
+	});
+};
 
-}
+const verifyBloodReq = async (id: string, user: IRequestUser) => {
+	const existUser = await prisma.user.findUnique({
+		where: {
+			email: user.email,
+			role: "ADMIN",
+		},
+	});
 
-const verifyBloodReq=async(id:string,user:IRequestUser)=>{
-    const existUser=await prisma.user.findUnique({
-        where:{
-            email:user.email,
-            role:"ADMIN"
-        }
-    })
+	if (!existUser) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
 
-    if(!existUser){
-        throw new AppError(httpStatus.NOT_FOUND,"User Not Founded")
-    }
+	const exitsBloodReq = await prisma.bloodRequest.findUnique({
+		where: {
+			id: id,
+		},
+	});
 
-    const exitsBloodReq=await prisma.bloodRequest.findUnique({
-        where:{
-            id:id
-        }
-    })
+	if (!exitsBloodReq) {
+		throw new AppError(httpStatus.NOT_FOUND, "Blood Request Not Founded");
+	}
 
-    
-    if(!exitsBloodReq){
-        throw new AppError(httpStatus.NOT_FOUND,"Blood Request Not Founded")
-    }
+	await prisma.bloodRequest.update({
+		where: {
+			id: exitsBloodReq.id,
+		},
+		data: { status: "ACCEPTED" },
+	});
+};
 
-    await prisma.bloodRequest.update({
-        where:{
-            id:exitsBloodReq.id
-        },data:{status:"ACCEPTED"}
-    })
-}
-
-export const AdminService={
-    getUsers,
-    getAllDonor,
-    getAllRequest,
-    updateUserStaus,
-    deleteFakeBloodRequest,
-    deleteUser,
-    verifyBloodReq
-}
+export const AdminService = {
+	getUsers,
+	getAllDonor,
+	getAllRequest,
+	updateUserStaus,
+	deleteFakeBloodRequest,
+	deleteUser,
+	verifyBloodReq,
+};

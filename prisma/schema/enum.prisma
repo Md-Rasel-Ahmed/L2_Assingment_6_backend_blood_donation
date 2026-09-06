@@ -47,3 +47,9 @@ enum PaymentMethod {
     NAGAD
     CARD
 }
+
+enum Provider {
+    CREDENTIALS
+    GOOLE
+    FACEBOOK
+}

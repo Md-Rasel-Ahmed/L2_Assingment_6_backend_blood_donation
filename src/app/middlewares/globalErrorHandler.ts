@@ -1,19 +1,24 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
-import httpStatus from "http-status"
+import { ErrorRequestHandler, type NextFunction, type Request, type Response } from "express";
+import httpStatus from "http-status";
 import { Prisma } from "../../generated/prisma/client";
 import config from "../config";
 import { ZodError } from "zod";
-export const globalErrorHandler=async (err:any,req:Request,res:Response,next:NextFunction)=>{
-   let statusCode=err.statusCode || httpStatus.INTERNAL_SERVER_ERROR
-   let errorMessage=err.message || "Something Went Wrong!"
-   let errorName = err.name || "Something Went Wrong!"
+export const globalErrorHandler = async (
+	err: any,
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	let statusCode = err.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+	let errorMessage = err.message || "Something Went Wrong!";
+	const errorName = err.name || "Something Went Wrong!";
 
-   if(err instanceof ZodError){
-     statusCode = httpStatus.BAD_REQUEST
-	 errorMessage=err.issues[0].message
-     console.log(err.issues[0].message);
-   }
-if (config.node_env === "development") {
+	if (err instanceof ZodError) {
+		statusCode = httpStatus.BAD_REQUEST;
+		errorMessage = err.issues[0].message;
+		console.log(err.issues[0].message);
+	}
+	if (config.node_env === "development") {
 		console.log("Error from Global Error Handler", err);
 	}
 	if (err instanceof Prisma.PrismaClientValidationError) {
@@ -47,7 +52,7 @@ if (config.node_env === "development") {
 		errorMessage = err.message;
 	}
 
-    res.status(err.statusCode||httpStatus.INTERNAL_SERVER_ERROR).json({
+	res.status(err.statusCode || httpStatus.INTERNAL_SERVER_ERROR).json({
 		success: false,
 		statusCode: statusCode || httpStatus.INTERNAL_SERVER_ERROR,
 		name:
@@ -59,4 +64,4 @@ if (config.node_env === "development") {
 		error: config.node_env === "development" ? err : undefined,
 		stack: config.node_env === "development" ? err.stack : undefined,
 	});
-}
+};

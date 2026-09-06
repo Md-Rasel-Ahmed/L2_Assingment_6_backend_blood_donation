@@ -1,92 +1,108 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
-import httpStatus from "http-status"
+import httpStatus from "http-status";
 
-const singup=catchAsync(async(req:Request,res:Response)=>{
-    const payload=req.body
-    const result=await AuthService.singup(payload)
-   sendResponse(res,{
-    success:true,
-    message:"Sent Email Verification Code",
-    statusCode:httpStatus.CREATED,
-    data:result
-   })
-})
-const login=catchAsync(async(req:Request,res:Response)=>{
-    const payload=req.body
-  const {accessToken,refreshToken}=await AuthService.login(payload)
-   
-  res.cookie("accessToken",accessToken,{
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite:"lax",
-    maxAge: 1 * 24 * 60 * 60 * 1000,//1day
-  })
-  res.cookie("refreshToken",refreshToken,{
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite:"lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,//7 days
-  })
+const singup = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const result = await AuthService.singup(payload);
+	sendResponse(res, {
+		success: true,
+		message: "Sent Email Verification Code",
+		statusCode: httpStatus.CREATED,
+		data: result,
+	});
+});
+const login = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const { accessToken, refreshToken } = await AuthService.login(payload);
 
-   sendResponse(res,{
-    success:true,
-    message:"User Login Successfull",
-    statusCode:httpStatus.OK,
-    data:{
-        accessToken,
-        refreshToken
-    }
-   })
-})
-const emailVerify=catchAsync(async(req:Request,res:Response)=>{
-   const paylaod=req.body
-  await AuthService.emailVerify(paylaod)
-   sendResponse(res,{
-    success:true,
-    message:"Email Verification Successfull",
-    statusCode:httpStatus.OK,
-    data:{}
-   })
-})
-const sendOtp=catchAsync(async(req:Request,res:Response)=>{
-   const paylaod=req.body
-  await AuthService.sendOtp(paylaod)
-   sendResponse(res,{
-    success:true,
-    message:"Email Verification Code Sent",
-    statusCode:httpStatus.OK,
-    data:{}
-   })
-})
-const forgotPassword=catchAsync(async(req:Request,res:Response)=>{
-   const user=req.user!
-  await AuthService.forgotPassword(user)
-   sendResponse(res,{
-    success:true,
-    message:"Email Verification Code Sent",
-    statusCode:httpStatus.OK,
-    data:{}
-   })
-})
-const resetPassword=catchAsync(async(req:Request,res:Response)=>{
-   const paylaod=req.body
-  await AuthService.resetPassword(paylaod)
-   sendResponse(res,{
-    success:true,
-    message:"Password Reset Successfull",
-    statusCode:httpStatus.OK,
-    data:{}
-   })
-})
+	res.cookie("accessToken", accessToken, {
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		sameSite: "lax",
+		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		sameSite: "lax",
+		maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+	});
 
-export const AuthController={
-    singup,
-    login,
-    sendOtp,
-    resetPassword,
-    forgotPassword,
-    emailVerify
-}
+	sendResponse(res, {
+		success: true,
+		message: "User Login Successfull",
+		statusCode: httpStatus.OK,
+		data: {
+			accessToken,
+			refreshToken,
+		},
+	});
+});
+const emailVerify = catchAsync(async (req: Request, res: Response) => {
+	const paylaod = req.body;
+	await AuthService.emailVerify(paylaod);
+	sendResponse(res, {
+		success: true,
+		message: "Email Verification Successfull",
+		statusCode: httpStatus.OK,
+		data: {},
+	});
+});
+const sendOtp = catchAsync(async (req: Request, res: Response) => {
+	const paylaod = req.body;
+	await AuthService.sendOtp(paylaod);
+	sendResponse(res, {
+		success: true,
+		message: "Email Verification Code Sent",
+		statusCode: httpStatus.OK,
+		data: {},
+	});
+});
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	await AuthService.forgotPassword(user);
+	sendResponse(res, {
+		success: true,
+		message: "Email Verification Code Sent",
+		statusCode: httpStatus.OK,
+		data: {},
+	});
+});
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+	const paylaod = req.body;
+	await AuthService.resetPassword(paylaod);
+	sendResponse(res, {
+		success: true,
+		message: "Password Reset Successfull",
+		statusCode: httpStatus.OK,
+		data: {},
+	});
+});
+const googleCallback = catchAsync(async (req: Request, res: Response) => {
+ const googleUser = req.user as {
+    googleId: string;
+    email: string;
+    name: string;
+    image?: string;
+  };
+    const result = await AuthService.googleLogin(googleUser);
+    sendResponse(res,{
+		statusCode:httpStatus.OK,
+		message:"Google Login Success",
+		success:true,
+		data:result
+	})
+});
+
+export const AuthController = {
+	singup,
+	login,
+	sendOtp,
+	resetPassword,
+	forgotPassword,
+	emailVerify,
+	googleCallback
+};

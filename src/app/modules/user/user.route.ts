@@ -6,10 +6,19 @@ import upload from "../../lib/multer";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { updateUserDataSchema } from "./user.validation";
 
-const route =Router()
+const route = Router();
 
-route.get("/get-me",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),UsersController.getMe)
+route.get(
+	"/get-me",
+	auth(Role.ADMIN, Role.DONOR, Role.PATIENT),
+	UsersController.getMe,
+);
 
-route.patch("/edit-me",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),upload.single("image"),UsersController.updateProfile)
+route.patch(
+	"/edit-me",
+	auth(Role.ADMIN, Role.DONOR, Role.PATIENT),
+	upload.single("image"),
+	UsersController.updateProfile,
+);
 
-export const UserRouter=route
+export const UserRouter = route;

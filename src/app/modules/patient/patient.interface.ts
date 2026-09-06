@@ -1,21 +1,21 @@
 export interface ICreateBloodRequest {
-  patientId: string;
-  patientName: string;
-  bagsNeeded?: number;
-  hospitalName: string;
-  district: string;
-  upazila: string;
-  hospitalAddr: string;
-  neededBy: string | Date;
-  details?: string;
+	patientId: string;
+	patientName: string;
+	bagsNeeded?: number;
+	hospitalName: string;
+	district: string;
+	upazila: string;
+	hospitalAddr: string;
+	neededBy: string | Date;
+	details?: string;
 }
 export interface IUpdateBloodRequest {
-  patientName?: string;
-  bagsNeeded?: number;
-  hospitalName?: string;
-  district?: string;
-  upazila?: string;
-  hospitalAddr?: string;
-  neededBy?: string | Date;
-  details?: string;
+	patientName?: string;
+	bagsNeeded?: number;
+	hospitalName?: string;
+	district?: string;
+	upazila?: string;
+	hospitalAddr?: string;
+	neededBy?: string | Date;
+	details?: string;
 }

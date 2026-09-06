@@ -15,6 +15,8 @@ import { DonorRoute } from "./app/modules/donor/donor.route";
 import { DonationRoute } from "./app/modules/donation/donation.route";
 import { getBkashIdToken } from "./app/lib/bkash";
 import { UserRouter } from "./app/modules/user/user.route";
+import passport from "./app/lib/passport";
+
 
 const app: Application = express();
 
@@ -32,13 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(passport.initialize());
 
 
-app.use("/api/v1/auth",AuthRoute)
-app.use("/api/v1/patient",PatientRoute)
-app.use("/api/v1/donor",DonorRoute)
-app.use("/api/v1/donation",DonationRoute)
-app.use("/api/v1/users",UserRouter)
+app.use("/api/v1/auth", AuthRoute);
+app.use("/api/v1/patient", PatientRoute);
+app.use("/api/v1/donor", DonorRoute);
+app.use("/api/v1/donation", DonationRoute);
+app.use("/api/v1/users", UserRouter);
 
 app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -58,7 +61,6 @@ app.get("/", async (req: Request, res: Response) => {
 	});
 });
 
-
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 export default app;
