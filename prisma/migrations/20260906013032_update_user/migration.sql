@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "imgPublicId" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "imgURL" TEXT NOT NULL DEFAULT '';

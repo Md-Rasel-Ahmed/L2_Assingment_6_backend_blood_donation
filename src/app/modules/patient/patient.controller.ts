@@ -34,7 +34,7 @@ const getMyBloodRequests=catchAsync(async(req:Request,res:Response)=>{
     const query=req.query
     const user=req.user!
     
-    const data=await PatientService.getAllBloodRequest(query,user)
+    const data=await PatientService.getMyBloodRequest(query,user)
       sendResponse(res,{
  success:true,
  statusCode:httpStatus.OK,
@@ -81,6 +81,18 @@ const confirmDonation=catchAsync(async(req:Request,res:Response)=>{
  data:data
       })
 })
+const gelAllBloodRequest=catchAsync(async(req:Request,res:Response)=>{
+
+     const query=req.query
+   
+    const data=await PatientService.gelAllBloodRequest(query)
+      sendResponse(res,{
+ success:true,
+ statusCode:httpStatus.OK,
+ message:"All Blood Request Retrived Successfull",
+ data:data
+      })
+})
 
 export const PatientController ={
     createBloodRequest,
@@ -88,5 +100,6 @@ export const PatientController ={
     updateRequest,
     getMyBloodRequests,
     getBloodRequestResponseById,
-    confirmDonation
+    confirmDonation,
+    gelAllBloodRequest
 }

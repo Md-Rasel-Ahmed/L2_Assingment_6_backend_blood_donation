@@ -120,7 +120,7 @@ const updateRequest=async(id:string,payload:IUpdateBloodRequest,user:IRequestUse
     return updateBloodRequest
 }
 
-const getAllBloodRequest=async(query:Record<string,any>,user:IRequestUser)=>{
+const getMyBloodRequest=async(query:Record<string,any>,user:IRequestUser)=>{
       const limit=query.limit?Number(query.limit):10
     const page=query.page?Number(query.page):1
     const skip=(page-1)*limit
@@ -261,11 +261,68 @@ const confirmDonation=async(id:string,user:IRequestUser)=>{
    
    
 }
+const gelAllBloodRequest=async(query:Record<string,any>)=>{
+       const limit=query.limit?Number(query.limit):10
+    const page=query.page?Number(query.page):1
+    const skip=(page-1)*limit
+   
+
+    const andCondition:BloodRequestWhereInput[]=[
+        {urgency:"EMERGENCY"},
+        {status:"ACCEPTED"}
+    ]
+ 
+
+//   Search by location
+
+ if(query.searchTerms){
+    andCondition.push({
+        OR:[
+            {hospitalAddr:{contains:query.searchTerms,mode:"insensitive"}},
+            {hospitalName:{contains:query.searchTerms,mode:"insensitive"}},
+            {district:{contains:query.searchTerms,mode:"insensitive"}},
+        ]
+    })
+ }
+
+
+//  filter by uregency
+if(query.urgency){
+    andCondition.push({urgency:query.urgency})
+}
+
+
+
+    const allRequest=await prisma.bloodRequest.findMany({
+        where:{
+            AND:andCondition
+        },
+        take:limit,
+        skip,
+        include:{
+            patient:true,
+            responses:true
+        }
+
+    })
+    const total=await prisma.bloodRequest.count({where:{AND:andCondition}})
+   return {
+    data:allRequest,
+    meta:{
+        page,
+        limit,
+        total,
+        totalPage:Math.ceil(total/limit)
+    }
+   }
+}
+
 export const PatientService={
     createBloodRequest,
     updateStatus,
     updateRequest,
-    getAllBloodRequest,
+    getMyBloodRequest,
     getBloodRequestResponseById,
-    confirmDonation
+    confirmDonation,
+    gelAllBloodRequest
 }

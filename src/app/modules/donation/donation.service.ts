@@ -109,7 +109,16 @@ const result=await response.json()
 })
 return transactionResult
 }
+const getMyPayments=async(user:IRequestUser)=>{
+    const payments=await prisma.payment.findMany({
+        where:{
+            userId:user.userId
+        }
+    })
+    return payments
+}
 export const DonationService={
     createDonationPayment,
-    paymentCallback
+    paymentCallback,
+    getMyPayments
 }

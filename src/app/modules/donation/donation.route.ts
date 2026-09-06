@@ -6,6 +6,7 @@ import { Role } from "../../../generated/prisma/enums";
 const route=Router()
 
 route.post("/create-donation",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),DonationController.createDonation)
+route.post("/my-payments",auth(Role.ADMIN,Role.DONOR,Role.PATIENT),DonationController.getMyPayments)
 
 route.get("/bkash/payment/callback",DonationController.bkashCallback)
 

@@ -21,9 +21,20 @@ const bkashCallback = catchAsync(async(req:Request,res:Response)=>{
     const {redirectURL}=await DonationService.paymentCallback(query)
   res.redirect(redirectURL)
 })
+const getMyPayments = catchAsync(async(req:Request,res:Response)=>{
+    const user=req.user!
+    const data=await DonationService.getMyPayments(user)
+   sendResponse(res,{
+         statusCode:httpStatus.CREATED,
+         success:true,
+         message:"Payments Retrived Successfull",
+         data:data
+    })
+})
 
 
 export const DonationController ={
     createDonation,
-    bkashCallback
+    bkashCallback,
+    getMyPayments
 }

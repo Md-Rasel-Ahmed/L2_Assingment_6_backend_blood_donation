@@ -9,6 +9,9 @@ route.post("/blood-requests",auth("PATIENT"),PatientController.createBloodReques
 route.post("/blood-requests/:id/confirm-donation",auth("PATIENT"),PatientController.confirmDonation)
 route.patch("/blood-requests/:id/status",auth("PATIENT"),PatientController.updateStatus)
 route.get("/my-requests",auth("PATIENT"),PatientController.getMyBloodRequests)
+// public api
+route.get("/blood-requests",PatientController.gelAllBloodRequest)
+
 route.patch("/bloodRequiest/:id",auth("PATIENT"),PatientController.updateRequest)
 route.get("/blood-requests/:id/responses",auth("PATIENT"),PatientController.getBloodRequestResponseById)
 
