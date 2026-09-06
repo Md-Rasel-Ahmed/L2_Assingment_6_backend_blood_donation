@@ -1,3 +1,5 @@
+import { UploadApiResponse } from "cloudinary"
+import cloudinary from "../../lib/cloudinary"
 import { prisma } from "../../lib/prisma"
 import { AppError } from "../../utils/AppError"
 import { IRequestUser } from "./user.interface"
@@ -16,12 +18,53 @@ const getMe=async(user:IRequestUser)=>{
     where:{
         email:isExistUser.email
     },
+    omit:{password:true},
     include:{donor:true}
    })
    
 return getMe
 }
 
+const udpateProfile=async(file:any,data:any,user:IRequestUser)=>{
+    let imgurl=""
+    let publicId=""
+    if(file){
+    const cloudinaryResult=await new Promise<UploadApiResponse>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "donation-healthcare",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+            if(!result){return reject()}
+          resolve(result);
+        }
+      }
+    );
+
+    stream.end(file.buffer);
+  });
+  imgurl=cloudinaryResult.secure_url,
+  publicId=cloudinaryResult.public_id
+}
+
+ const updateProfile=await prisma.user.update({
+    where:{email:user.email},
+    data:{
+        ...data,
+         ...(imgurl && {
+         imgURL:imgurl,
+       imgPublicId:publicId
+      }),
+     
+        
+    }
+ })
+ return updateProfile
+}
 export const UsersService={
-    getMe
+    getMe,
+    udpateProfile
 }

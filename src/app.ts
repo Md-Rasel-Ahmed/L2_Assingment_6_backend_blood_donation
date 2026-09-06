@@ -14,6 +14,7 @@ import { PatientRoute } from "./app/modules/patient/patient.route";
 import { DonorRoute } from "./app/modules/donor/donor.route";
 import { DonationRoute } from "./app/modules/donation/donation.route";
 import { getBkashIdToken } from "./app/lib/bkash";
+import { UserRouter } from "./app/modules/user/user.route";
 
 const app: Application = express();
 
@@ -37,6 +38,7 @@ app.use("/api/v1/auth",AuthRoute)
 app.use("/api/v1/patient",PatientRoute)
 app.use("/api/v1/donor",DonorRoute)
 app.use("/api/v1/donation",DonationRoute)
+app.use("/api/v1/users",UserRouter)
 
 app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
 	try {
