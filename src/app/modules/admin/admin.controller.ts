@@ -81,7 +81,7 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
 const verifyBloodReq = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 	const id = req.params.id;
-	await AdminService.deleteUser(id as string, user);
+	await AdminService.verifyBloodReq(id as string, user);
 
 	sendResponse(res, {
 		success: true,

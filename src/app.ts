@@ -16,6 +16,7 @@ import { DonationRoute } from "./app/modules/donation/donation.route";
 import { getBkashIdToken } from "./app/lib/bkash";
 import { UserRouter } from "./app/modules/user/user.route";
 import passport from "./app/lib/passport";
+import { AdminRoute } from "./app/modules/admin/admin.route";
 
 
 const app: Application = express();
@@ -42,6 +43,7 @@ app.use("/api/v1/patient", PatientRoute);
 app.use("/api/v1/donor", DonorRoute);
 app.use("/api/v1/donation", DonationRoute);
 app.use("/api/v1/users", UserRouter);
+app.use("/api/v1/admin",AdminRoute)
 
 app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
 	try {

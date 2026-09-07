@@ -88,12 +88,18 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
     name: string;
     image?: string;
   };
-    const result = await AuthService.googleLogin(googleUser);
+    const {accessToken,user} = await AuthService.googleLoginCallback(googleUser);
+	res.cookie("accessToken", accessToken, {
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		sameSite: "lax",
+		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
+	});
     sendResponse(res,{
 		statusCode:httpStatus.OK,
 		message:"Google Login Success",
 		success:true,
-		data:result
+		data:user
 	})
 });
 

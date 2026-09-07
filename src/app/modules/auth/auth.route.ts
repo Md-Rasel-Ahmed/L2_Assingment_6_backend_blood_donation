@@ -25,7 +25,7 @@ route.get(
   })
 );
 route.get(
-  "/google/callback",
+  "/google/login/callback",
   passport.authenticate("google", {
     session: false,
     failureRedirect: "/login",

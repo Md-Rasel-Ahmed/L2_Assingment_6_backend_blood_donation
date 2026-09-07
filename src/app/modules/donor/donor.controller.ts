@@ -22,7 +22,7 @@ const acceptedRequest = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
 		success: true,
-		message: "Blood Request Accepted Successfull",
+		message: "Blood Request Accepted Successfull Waited For Patient Response",
 		data: data,
 	});
 });

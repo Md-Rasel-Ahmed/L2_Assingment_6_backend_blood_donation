@@ -3,7 +3,7 @@ import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 import type { Ilogin, ISingup } from "./auth.interface";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { createToken } from "../../utils/jwtHelpers";
 import config from "../../config";
 import { Role, UserStatus } from "../../../generated/prisma/enums";
@@ -293,7 +293,7 @@ const resetPassword = async (payload: any) => {
 	await redisClient.del([key]);
 	const templatePath = path.join(
 		process.cwd(),
-		"src/app/templates/password-changed.ejs",
+		"src/app/tamplates/password-changed.ejs",
 	);
 	const html = await ejs.renderFile(templatePath, {
 		userName: user.name,
@@ -304,6 +304,7 @@ const resetPassword = async (payload: any) => {
 		}),
 		supportUrl: "https://example.com/support",
 	});
+
 	// Send email to change password success message
 	await transporter.sendMail({
 		from: "nhd305812@gmail.com",
@@ -313,7 +314,7 @@ const resetPassword = async (payload: any) => {
 	});
 };
 
-const googleLogin=async(googleUser: {
+const googleLoginCallback=async(googleUser: {
   googleId: string;
   email: string;
   name: string;
@@ -343,7 +344,8 @@ const googleLogin=async(googleUser: {
         email: googleUser.email,
         googleId: googleUser.googleId,
 		provide:"GOOLE",
-        image: googleUser.image,
+        imgURL: googleUser.image,
+		emailVerified:true
       },
     });
 	}
@@ -371,5 +373,5 @@ export const AuthService = {
 	sendOtp,
 	forgotPassword,
 	resetPassword,
-	googleLogin
+	googleLoginCallback
 };

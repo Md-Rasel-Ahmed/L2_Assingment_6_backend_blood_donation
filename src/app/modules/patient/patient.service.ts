@@ -61,6 +61,7 @@ const updateStatus = async (
 	const isExistBloodReq = await prisma.bloodRequest.findUnique({
 		where: {
 			id: id,
+			patientId:existPatient.id
 		},
 		include: { responses: true },
 	});

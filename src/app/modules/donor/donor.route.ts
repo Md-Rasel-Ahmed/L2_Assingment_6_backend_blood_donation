@@ -33,10 +33,10 @@ route.patch(
 	auth(Role.DONOR),
 	DonorController.updateAvailability,
 );
-route.patch(
-	"/donor-profile",
-	auth(Role.DONOR),
-	DonorController.updateDonationProfile,
-);
+// route.patch(
+// 	"/donor-profile",
+// 	auth(Role.DONOR),
+// 	DonorController.updateDonationProfile,
+// );
 
 export const DonorRoute = route;

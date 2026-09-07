@@ -287,6 +287,7 @@ const verifyBloodReq = async (id: string, user: IRequestUser) => {
 	if (!exitsBloodReq) {
 		throw new AppError(httpStatus.NOT_FOUND, "Blood Request Not Founded");
 	}
+	console.log("ekhane asache ");
 
 	await prisma.bloodRequest.update({
 		where: {
