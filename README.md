@@ -98,3 +98,30 @@ Open your terminal and clone the project to your local machine:
 git clone [https://github.com/Md-Rasel-Ahmed/L2_Assingment_6_backend_blood_donation](https://github.com/Md-Rasel-Ahmed/L2_Assingment_6_backend_blood_donation)
 cd L2_Assingment_6_backend_blood_donation
 ```
+
+### Step 2: Install Dependencies
+
+Open your terminal and write:
+
+```bash
+npm install
+```
+
+### Step 3: Configure Environment Variables
+
+Open your project create .env file on the root:
+
+### Step 4: Database Setup & Prisma Migrations & Generate
+
+```
+npx prisma migrate dev --name init
+npx prisma generate
+
+```
+
+### Step 5: Start the Development Server
+
+```
+npm run dev
+
+```
