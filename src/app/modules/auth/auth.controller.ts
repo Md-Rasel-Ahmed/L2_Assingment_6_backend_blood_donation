@@ -21,15 +21,23 @@ const login = catchAsync(async (req: Request, res: Response) => {
 	const { accessToken, refreshToken } = await AuthService.login(payload);
 
 	res.cookie("accessToken", accessToken, {
-		secure: process.env.NODE_ENV === "production",
+		// secure: process.env.NODE_ENV === "production",
+		
+    secure:true,  
+    path:"/",
+    sameSite: "none",
 		httpOnly: true,
-		sameSite: "lax",
+		// sameSite: "lax",
 		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
 	});
 	res.cookie("refreshToken", refreshToken, {
-		secure: process.env.NODE_ENV === "production",
+	// secure: process.env.NODE_ENV === "production",
+		
+    secure:true,  
+    path:"/",
+    sameSite: "none",
 		httpOnly: true,
-		sameSite: "lax",
+		// sameSite: "lax",
 		maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
 	});
 
