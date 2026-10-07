@@ -10,7 +10,7 @@ route.post(
 	auth(Role.ADMIN, Role.DONOR, Role.PATIENT),
 	DonationController.createDonation,
 );
-route.post(
+route.get(
 	"/my-payments",
 	auth(Role.ADMIN, Role.DONOR, Role.PATIENT),
 	DonationController.getMyPayments,

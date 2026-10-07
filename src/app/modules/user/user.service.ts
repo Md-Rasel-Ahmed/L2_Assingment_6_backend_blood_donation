@@ -20,13 +20,14 @@ const getMe = async (user: IRequestUser) => {
 			email: isExistUser.email,
 		},
 		omit: { password: true },
-		include: { donor: true },
+		include: { donor: true},
 	});
 
 	return getMe;
 };
 
 const udpateProfile = async (file: any, data: any, user: IRequestUser) => {
+	console.log("file form service ",file);
 	const findUser = await prisma.user.findUnique({
 		where: { email: user.email },
 	});
@@ -60,6 +61,7 @@ const udpateProfile = async (file: any, data: any, user: IRequestUser) => {
 		(imgurl = cloudinaryResult.secure_url),
 			(publicId = cloudinaryResult.public_id);
 	}
+    
 
 	const updateProfile = await prisma.user.update({
 		where: { email: user.email },
@@ -76,6 +78,7 @@ const udpateProfile = async (file: any, data: any, user: IRequestUser) => {
 		description: "Update Profile",
 		entity: "Patient,Donor,Admin",
 		entityId: findUser.id,
+		userId:findUser.id
 	});
 	return updateProfile;
 };

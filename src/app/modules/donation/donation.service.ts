@@ -5,9 +5,10 @@ import { AppError } from "../../utils/AppError";
 import type { IRequestUser } from "../user/user.interface";
 import httpStatus from "http-status";
 
-const createDonationPayment = async (user: IRequestUser) => {
+const createDonationPayment = async (user: IRequestUser,amount:number) => {
 	const transactionResult = await prisma.$transaction(async (tx) => {
 		const idToken = await getBkashIdToken();
+		// console.log(idToken,"from crate payment");
 		const response = await fetch(
 			`${config.bkash_base_url}/tokenized/checkout/create`,
 			{
@@ -25,7 +26,7 @@ const createDonationPayment = async (user: IRequestUser) => {
 					callbackURL:
 						"http://localhost:5000/api/v1/donation/bkash/payment/callback",
 					merchantAssociationInfo: "MI05MID54RF09123456One",
-					amount: "100",
+					amount: amount,
 					currency: "BDT",
 					intent: "sale",
 					merchantInvoiceNumber: user.userId,
@@ -36,7 +37,7 @@ const createDonationPayment = async (user: IRequestUser) => {
 
 		await tx.payment.create({
 			data: {
-				amount: "100",
+				amount: amount,
 				merchantInvoiceNumber: result.merchantInvoiceNumber,
 				gatewayResponse: result,
 				payerReference: user.email,
@@ -45,7 +46,11 @@ const createDonationPayment = async (user: IRequestUser) => {
 			},
 		});
 		return result;
-	});
+		
+	},{
+    
+      timeout: 15000, 
+    });
 	return transactionResult;
 };
 
@@ -83,7 +88,7 @@ const paymentCallback = async (query: Record<string, any>) => {
 			);
 		}
 		const result = await response.json();
-
+          console.log(result);
 		if (status === "success") {
 			await tx.payment.update({
 				where: {
@@ -96,17 +101,17 @@ const paymentCallback = async (query: Record<string, any>) => {
 				},
 			});
 			return {
-				redirectURL: `${config.frontend_url}/dashboard/my-donation/?status=success`,
+				redirectURL: `${config.frontend_url}/donation/paymentStatus/?status=success&trxID=${result.trxID}&amont=${result.amount}`,
 			};
 		}
 		if (status === "failure") {
 			return {
-				redirectURL: `${config.frontend_url}/dashboard/my-donation/?status=failure`,
+				redirectURL: `${config.frontend_url}/donation/paymentStatus/?status=failure`,
 			};
 		}
 		if (status === "cancel") {
 			return {
-				redirectURL: `${config.frontend_url}/dashboard/my-donation/?status=cancel`,
+				redirectURL: `${config.frontend_url}/donation/paymentStatus/?status=cancel`,
 			};
 		} else {
 			throw new AppError(httpStatus.BAD_REQUEST, "Excute Payment Failed");

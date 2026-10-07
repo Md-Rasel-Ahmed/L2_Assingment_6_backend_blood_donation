@@ -10,12 +10,13 @@ export const getBkashIdToken = async () => {
 		const getRedisIdToken = await redisClient.get(bkashIdTokenKey);
 		const getRedisRefreshToken = await redisClient.get(bkashRefreshTokenKey);
 
-		const getRedisIdTokenTTL = await redisClient.ttl(getRedisIdToken as string);
+		const getRedisIdTokenTTL = await redisClient.ttl(bkashIdTokenKey as string);
 		const getRedisRefreshTokenTTL = await redisClient.ttl(
-			getRedisRefreshToken as string,
+			bkashRefreshTokenKey as string,
 		);
 
 		let bkashidToken = getRedisIdToken;
+		console.log(bkashIdTokenKey,"from bkash.ts");
 
 		if (getRedisIdTokenTTL <= 600 && getRedisRefreshTokenTTL >= 600) {
 			const response = await fetch(
@@ -37,6 +38,18 @@ export const getBkashIdToken = async () => {
 			);
 			const result = await response.json();
 			bkashidToken = result.id_token;
+			await redisClient.set(bkashIdTokenKey, result.id_token, {
+				expiration: {
+					type: "EX",
+					value: 3600,
+				},
+			});
+			await redisClient.set(bkashRefreshTokenKey, result.refresh_token, {
+				expiration: {
+					type: "EX",
+					value: 3600 * 24 * 28,
+				},
+			});
 			return bkashidToken;
 		}
 

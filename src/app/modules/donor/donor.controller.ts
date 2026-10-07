@@ -3,10 +3,12 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { DonorService } from "./donor.service";
+import { IRequestUser } from "../user/user.interface";
+import { IAuthUser } from "../../middlewares/auth";
 
 const createDonorProfile = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
-	const user = req.user!;
+	const user = (req as any).user as IAuthUser;
 	const data = await DonorService.createDonorProfile(payload, user);
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
@@ -17,7 +19,10 @@ const createDonorProfile = catchAsync(async (req: Request, res: Response) => {
 });
 const acceptedRequest = catchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
+	
+
 	const data = await DonorService.acceptedRequest(id as string, user);
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
@@ -28,7 +33,8 @@ const acceptedRequest = catchAsync(async (req: Request, res: Response) => {
 });
 const getMyDonationHistories = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user!;
+			const user = (req as any).user as IAuthUser;
+
 		const data = await DonorService.getMyDonationHistories(user);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
@@ -40,7 +46,8 @@ const getMyDonationHistories = catchAsync(
 );
 const updateAvailability = catchAsync(async (req: Request, res: Response) => {
 	const id = req.params.id;
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const payload = req.body;
 	const data = await DonorService.updateAvailability(
 		id as string,
@@ -57,7 +64,8 @@ const updateAvailability = catchAsync(async (req: Request, res: Response) => {
 
 const updateDonationProfile = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user!;
+			const user = (req as any).user as IAuthUser;
+
 		const payload = req.body;
 		const data = await DonorService.updateDonationProfile(payload, user);
 		sendResponse(res, {
@@ -70,7 +78,8 @@ const updateDonationProfile = catchAsync(
 );
 const getActiveMatchingRequested = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user!;
+			const user = (req as any).user as IAuthUser;
+
 		const data = await DonorService.getActiveMatchingRequested(user);
 		sendResponse(res, {
 			statusCode: httpStatus.CREATED,

@@ -14,15 +14,26 @@ const createBloodRequest = async (
 	payload: ICreateBloodRequest,
 	user: IRequestUser,
 ) => {
+	console.log(payload);
 	const existPatient = await prisma.user.findUnique({
 		where: {
 			email: user.email,
 		},
 	});
+
 	if (!existPatient || existPatient.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Founded!");
 	}
 
+	if(!existPatient.emailVerified){
+		throw new AppError(httpStatus.BAD_REQUEST, "Your Email Is Not Verified Yet,Please Verify Email");
+	}
+	if(existPatient.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Create Blood Request Now,Wait For Admin Verified Account");
+	}
+	if(existPatient.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Create Blood Request Because You Are SUSPENDED");
+	}
 	const createBloodRequest = await prisma.bloodRequest.create({
 		data: {
 			patientId: existPatient.id,
@@ -35,7 +46,7 @@ const createBloodRequest = async (
 			upazila: payload.upazila,
 			bagsNeeded: payload.bagsNeeded,
 			details: payload.details,
-			urgency: UrgencyLevel.NORMAL,
+			urgency: payload.urgency as UrgencyLevel
 		},
 		include: {
 			patient: true,
@@ -57,6 +68,12 @@ const updateStatus = async (
 	});
 	if (!existPatient || existPatient.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Founded!");
+	}
+	if(existPatient.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Update Blood Request Now,Wait For Admin Verified");
+	}
+	if(existPatient.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Create Blood Request Because You Are SUSPENDED");
 	}
 	const isExistBloodReq = await prisma.bloodRequest.findUnique({
 		where: {
@@ -129,6 +146,12 @@ const updateRequest = async (
 	});
 	if (!existPatient || existPatient.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Founded!");
+	}
+	if(existPatient.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Update Blood Request Now,Wait For Admin Verified");
+	}
+	if(existPatient.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Create Blood Request Because You Are SUSPENDED");
 	}
 	const isExistBloodReq = await prisma.bloodRequest.findUnique({
 		where: {
@@ -232,6 +255,12 @@ const getBloodRequestResponseById = async (id: string, user: IRequestUser) => {
 	if (!existPatient || existPatient.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Founded!");
 	}
+	if(existPatient.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Get Blood Request Now,Wait For Admin Verified");
+	}
+	if(existPatient.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Get Blood Request Because You Are SUSPENDED");
+	}
 	const isExistBloodReq = await prisma.bloodRequest.findUnique({
 		where: {
 			id: id,
@@ -246,9 +275,11 @@ const getBloodRequestResponseById = async (id: string, user: IRequestUser) => {
 			id,
 		},
 		include: {
+			patient:true,
 			responses: {
 				include: {
 					donor: true,
+					request:true
 				},
 			},
 		},
@@ -266,6 +297,13 @@ const confirmDonation = async (id: string, user: IRequestUser) => {
 		if (!existPatient || existPatient.isDeleted) {
 			throw new AppError(httpStatus.NOT_FOUND, "Patient Profile Not Founded!");
 		}
+
+		if(existPatient.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Are Unverified,Wait For Admin Verified");
+	}
+	if(existPatient.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Are SUSPENDED");
+	}
 		const isExistDonor = await tx.donor.findUnique({ where: { userId: id } });
 		if (!isExistDonor) {
 			throw new AppError(
@@ -314,7 +352,7 @@ const gelAllBloodRequest = async (query: Record<string, any>) => {
 	const skip = (page - 1) * limit;
 
 	const andCondition: BloodRequestWhereInput[] = [
-		{ urgency: "EMERGENCY" },
+	
 		{ status: "ACCEPTED" },
 	];
 

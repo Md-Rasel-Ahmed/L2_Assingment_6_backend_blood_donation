@@ -2,9 +2,9 @@ import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 import type { Ilogin, ISingup } from "./auth.interface";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { createToken } from "../../utils/jwtHelpers";
+import { createToken, verifyToken } from "../../utils/jwtHelpers";
 import config from "../../config";
 import { Role, UserStatus } from "../../../generated/prisma/enums";
 import { redisClient } from "../../lib/radis";
@@ -48,7 +48,7 @@ const singup = async (payload: ISingup) => {
 	}
 
 	const hashPassword = await bcrypt.hash(password, 10);
-
+    const upperCaseRole=role.toUpperCase()
 	const createUser = await prisma.user.create({
 		data: {
 			email: email,
@@ -89,7 +89,7 @@ const singup = async (payload: ISingup) => {
 	await transporter.sendMail({
 		from: "nhd305812@gmail.com",
 		to: createUser.email,
-		subject: "Your OTP Code",
+		subject: "Register Email Verify OTP",
 		html: html,
 	});
 };
@@ -140,6 +140,9 @@ const login = async (payload: Ilogin) => {
 		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
 	}
 
+	if(isExistUser.googleId){
+		throw new AppError(httpStatus.BAD_REQUEST,"Your Are Google Loging User You Cannot Loging With Creadentials")
+	}
 	if (!isExistUser.emailVerified) {
 		throw new AppError(
 			httpStatus.FORBIDDEN,
@@ -176,6 +179,9 @@ const login = async (payload: Ilogin) => {
 	};
 };
 
+const getMe=async()=>{
+
+}
 
 const sendOtp = async (payload: any) => {
 	const exitUser = await prisma.user.findUnique({
@@ -215,10 +221,10 @@ const sendOtp = async (payload: any) => {
 	});
 };
 
-const forgotPassword = async (user: IRequestUser) => {
+const forgotPassword = async (payload:{email:string}) => {
 	const isExistUser = await prisma.user.findUnique({
 		where: {
-			email: user.email,
+			email: payload.email,
 		},
 	});
 	if (!isExistUser || isExistUser.isDeleted) {
@@ -260,16 +266,16 @@ const resetPassword = async (payload: any) => {
 	if (!user) {
 		throw new AppError(httpStatus.NOT_FOUND, "User not found");
 	}
-	if (!user.emailVerified) {
-		throw new AppError(httpStatus.BAD_REQUEST, "Email is not verified");
-	}
-	if (user.status === UserStatus.SUSPENDED) {
-		throw new AppError(httpStatus.FORBIDDEN, "User is SUSPENDED");
-	}
+	// if (!user.emailVerified) {
+	// 	throw new AppError(httpStatus.BAD_REQUEST, "Email is not verified");
+	// }
+	// if (user.status === UserStatus.SUSPENDED) {
+	// 	throw new AppError(httpStatus.FORBIDDEN, "User is SUSPENDED");
+	// }
 
-	if (user.isDeleted) {
-		throw new AppError(httpStatus.FORBIDDEN, "User is deleted");
-	}
+	// if (user.isDeleted) {
+	// 	throw new AppError(httpStatus.FORBIDDEN, "User is deleted");
+	// }
 
 	const key = `forgot-password:${user.email}`;
 
@@ -302,7 +308,7 @@ const resetPassword = async (payload: any) => {
 			dateStyle: "medium",
 			timeStyle: "short",
 		}),
-		supportUrl: "https://example.com/support",
+		supportUrl: "https://donatonhealthcare.com/support",
 	});
 
 	// Send email to change password success message
@@ -334,6 +340,7 @@ const googleLoginCallback=async(googleUser: {
 				googleId:googleUser.googleId,
 				imgURL:googleUser.image,
 				name:googleUser.name,	
+				emailVerified:true
 			}
 		})
 	}
@@ -366,6 +373,48 @@ const googleLoginCallback=async(googleUser: {
 		user
 	}
 }
+
+const refreshToken=async(token:string)=>{
+	const verifiedRefreshToken=await verifyToken(token,config.jwt_refresh_secret)
+
+	if (!verifiedRefreshToken.success || !verifiedRefreshToken.data) {
+		throw new AppError(httpStatus.UNAUTHORIZED, config.node_env === "development" ? verifiedRefreshToken.error : "Invalid refresh token");
+	}
+
+	const data = verifiedRefreshToken.data as JwtPayload;
+
+	const user = await prisma.user.findUnique({
+		where: { id: data.userId },
+	});
+
+	if (!user || user.isDeleted || user.status !== UserStatus.ACTIVE) {
+		throw new AppError(httpStatus.FORBIDDEN, "User is inactive or not found");
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken =await  createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = await createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+}
 export const AuthService = {
 	singup,
 	login,
@@ -373,5 +422,7 @@ export const AuthService = {
 	sendOtp,
 	forgotPassword,
 	resetPassword,
-	googleLoginCallback
+	googleLoginCallback,
+	refreshToken,
+	getMe
 };

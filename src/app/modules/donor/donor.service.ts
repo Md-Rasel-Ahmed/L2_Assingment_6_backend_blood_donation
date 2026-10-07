@@ -21,6 +21,12 @@ const createDonorProfile = async (
 	if (!isExistDonor || isExistDonor.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Donor Profile Not Founded!");
 	}
+	if(isExistDonor.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Create Donor Profile Now,Wait For Admin Verified");
+	}
+	if(isExistDonor.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Create Donor Profile Because You Are SUSPENDED");
+	}
 	if (isExistDonor.donor?.userId === isExistDonor.id) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
@@ -52,7 +58,7 @@ const getMyDonationHistories = async (user: IRequestUser) => {
 	if (!isExistDonor || isExistDonor.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Donor Profile Not Founded!");
 	}
-
+	
 	const getDonatons = await prisma.requestResponse.findMany({
 		where: {
 			donorId: isExistDonor.id,
@@ -83,7 +89,12 @@ const updateAvailability = async (
 	if (!isExistDonor || isExistDonor.isDeleted) {
 		throw new AppError(httpStatus.NOT_FOUND, "Donor Profile Not Founded!");
 	}
-
+	if(isExistDonor.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Update Availability Now,Wait For Admin Verified");
+	}
+	if(isExistDonor.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Update Availability Because You Are SUSPENDED");
+	}
 	// donor cannot update availabilty last donation date gather then or equal 3 month
 
 	if (payload.isAvailable === true) {
@@ -142,6 +153,13 @@ const updateDonationProfile = async (
 		throw new AppError(httpStatus.NOT_FOUND, "Donor Profile Not Founded!");
 	}
 
+		if(isExistDonor.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Update Donation Profile Now,Wait For Admin Verified");
+	}
+	if(isExistDonor.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Update Donation Profile Because You Are SUSPENDED");
+	}
+
 	const updatedProfile = await prisma.donor.update({
 		where: {
 			userId: isExistDonor.id,
@@ -168,6 +186,12 @@ const acceptedRequest = async (id: string, user: IRequestUser) => {
 		throw new AppError(httpStatus.NOT_FOUND, "User Profile Not Founded!");
 	}
 
+		if(isExistDonor.status === "PENDING_VERIFICATION"){
+		throw new AppError(httpStatus.BAD_REQUEST, "You Cannot Accepet Request Now,Wait For Admin Verified");
+	}
+	if(isExistDonor.status === "SUSPENDED"){
+		throw new AppError(httpStatus.FORBIDDEN, "You Cannot Accepet Request Because You Are SUSPENDED");
+	}
 	const findRequested = await prisma.bloodRequest.findUnique({
 		where: { id },
 		include: { responses: true },
@@ -257,10 +281,13 @@ const getActiveMatchingRequested = async (user: IRequestUser) => {
 
 	const matchedRequest = await prisma.bloodRequest.findMany({
 		where: {
-			district: isExistDonor.district as string,
+			// district: isExistDonor.district as string,
 			bloodGroup: isExistDonor.donor?.bloodGroup,
 			status: "ACCEPTED",
 		},
+		include:{
+			patient:true
+		}
 	});
 	return matchedRequest;
 };

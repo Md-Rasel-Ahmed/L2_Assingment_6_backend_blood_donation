@@ -7,18 +7,11 @@ import { verifyToken } from "../utils/jwtHelpers";
 import config from "../config";
 import type { JwtPayload } from "jsonwebtoken";
 
-declare global {
-	namespace Express {
-		interface Request {
-			user?: {
-				email: string;
-				userId: string;
-				role: Role;
-			};
-		}
-	}
+export interface IAuthUser {
+  userId: string;
+  email: string;
+  role: Role;
 }
-
 export const auth = (...requiredRole: Role[]) => {
 	return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 		const token = req.cookies.accessToken
@@ -33,7 +26,7 @@ export const auth = (...requiredRole: Role[]) => {
 			);
 		}
 		const verifiedToken = await verifyToken(token, config.jwt_access_secret);
-		if (!verifiedToken.success) {
+		if (verifiedToken.success===false) {
 			throw new AppError(
 				httpStatus.UNAUTHORIZED,
 				verifiedToken.message || "Invalid Or Expired Token",
@@ -47,11 +40,11 @@ export const auth = (...requiredRole: Role[]) => {
 				"Forbidden. You don't have permission to access this resource.",
 			);
 		}
-		req.user = {
-			email,
-			userId,
-			role,
-		};
+		(req as any).user = {
+      userId: userId,
+      email: email,
+      role:role,
+    };
 		next();
 	});
 };

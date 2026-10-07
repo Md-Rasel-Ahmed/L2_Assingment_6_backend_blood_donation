@@ -8,6 +8,7 @@ export interface ICreateBloodRequest {
 	hospitalAddr: string;
 	neededBy: string | Date;
 	details?: string;
+	urgency:string
 }
 export interface IUpdateBloodRequest {
 	patientName?: string;

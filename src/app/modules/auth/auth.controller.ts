@@ -3,6 +3,8 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import httpStatus from "http-status";
+import { IAuthUser } from "../../middlewares/auth";
+import { AppError } from "../../utils/AppError";
 
 const singup = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -41,6 +43,18 @@ const login = catchAsync(async (req: Request, res: Response) => {
 		},
 	});
 });
+const logout = catchAsync(async (req: Request, res: Response) => {
+	console.log("log out trigger");
+   res.clearCookie("accessToken")
+   res.clearCookie("refreshToken")
+
+	sendResponse(res, {
+		success: true,
+		message: "User Logout Successfull",
+		statusCode: httpStatus.OK,
+		data:{}
+	});
+});
 const emailVerify = catchAsync(async (req: Request, res: Response) => {
 	const paylaod = req.body;
 	await AuthService.emailVerify(paylaod);
@@ -62,8 +76,8 @@ const sendOtp = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
-	await AuthService.forgotPassword(user);
+	const payload=req.body
+	await AuthService.forgotPassword(payload);
 	sendResponse(res, {
 		success: true,
 		message: "Email Verification Code Sent",
@@ -95,12 +109,43 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
 		sameSite: "lax",
 		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
 	});
-    sendResponse(res,{
-		statusCode:httpStatus.OK,
-		message:"Google Login Success",
-		success:true,
-		data:user
-	})
+	res.redirect('http://localhost:3000/login?status=success&message=Logged in successfully with Google!')
+    // sendResponse(res,{
+	// 	statusCode:httpStatus.OK,
+	// 	message:"Google Login Success",
+	// 	success:true,
+	// 	data:user
+	// })
+});
+
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+	if (!req.cookies.refreshToken) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Refresh token is missing");
+	}
+	const { accessToken, refreshToken } = await AuthService.refreshToken(req.cookies.refreshToken);
+
+	res.cookie("accessToken", accessToken, {
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		sameSite: "lax",
+		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		secure: process.env.NODE_ENV === "production",
+		httpOnly: true,
+		sameSite: "lax",
+		maxAge: 7 * 24 * 60 * 60 * 1000, //7 days
+	});
+
+	sendResponse(res, {
+		success: true,
+		message: "New Token Create Successfull",
+		statusCode: httpStatus.OK,
+		data: {
+			accessToken,
+			refreshToken,
+		},
+	});
 });
 
 export const AuthController = {
@@ -110,5 +155,7 @@ export const AuthController = {
 	resetPassword,
 	forgotPassword,
 	emailVerify,
-	googleCallback
+	googleCallback,
+	refreshToken,
+	logout
 };

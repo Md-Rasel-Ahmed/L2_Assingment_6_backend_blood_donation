@@ -82,6 +82,15 @@ const getAllDonor = async (query: Record<string, any>, user: IRequestUser) => {
 	if (query.bloodGroup) {
 		andCondition.push({ bloodGroup: query.bloodGroup });
 	}
+  // serach
+	if (query.searchTerm) {
+		andCondition.push({
+			OR: [
+				{ user:{name:{contains:query.searchTerm,mode:"insensitive"}} },
+				{ user:{address:{contains:query.searchTerm,mode:"insensitive"}} },	
+			],
+		});
+	}
 
 	const orderBy = {
 		[sortBy]: sortOrder,
@@ -167,6 +176,26 @@ const getAllRequest = async (
 	};
 };
 
+const getBloodReqById=async(id:string,user:IRequestUser)=>{
+	const isExistAdmin = await prisma.user.findUnique({
+		where: { email: user.email },
+	});
+
+	if (!isExistAdmin) {
+		throw new AppError(httpStatus.NOT_FOUND, "User Not Founded");
+	}
+
+     return await prisma.bloodRequest.findUnique({
+		where:{
+			id
+		},
+		include:{
+			patient:true
+		}
+	 })
+
+}
+
 const deleteUser = async (email: string, user: IRequestUser) => {
 	const isExistAdmin = await prisma.user.findUnique({
 		where: { email: user.email },
@@ -202,7 +231,7 @@ const deleteUser = async (email: string, user: IRequestUser) => {
 };
 
 const updateUserStaus = async (
-	payload: { email: string; status: UserStatus },
+	payload: { email: string; status: UserStatus,isDeleted:boolean },
 	user: IRequestUser,
 ) => {
 	const isExistAdmin = await prisma.user.findUnique({
@@ -233,7 +262,7 @@ const updateUserStaus = async (
 		where: {
 			email: payload.email,
 		},
-		data: { status: payload.status },
+		data: { status: payload.status,isDeleted:payload.isDeleted },
 	});
 };
 
@@ -287,8 +316,13 @@ const verifyBloodReq = async (id: string, user: IRequestUser) => {
 	if (!exitsBloodReq) {
 		throw new AppError(httpStatus.NOT_FOUND, "Blood Request Not Founded");
 	}
-	console.log("ekhane asache ");
-
+	if(exitsBloodReq.status==="ACCEPTED"){
+		throw new AppError(httpStatus.BAD_REQUEST,"Blood Request Already Verified")
+	}
+    
+	if(exitsBloodReq.status!=="PENDING"){
+		throw new AppError(httpStatus.BAD_REQUEST,"You Can Update Only Pending Blood Request")
+	}
 	await prisma.bloodRequest.update({
 		where: {
 			id: exitsBloodReq.id,
@@ -305,4 +339,5 @@ export const AdminService = {
 	deleteFakeBloodRequest,
 	deleteUser,
 	verifyBloodReq,
+	getBloodReqById
 };

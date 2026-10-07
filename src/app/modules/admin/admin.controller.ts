@@ -3,9 +3,11 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { AdminService } from "./admin.service";
+import { IAuthUser } from "../../middlewares/auth";
 
 const getUsers = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const query = req.query;
 	const data = await AdminService.getUsers(query, user);
 
@@ -16,8 +18,22 @@ const getUsers = catchAsync(async (req: Request, res: Response) => {
 		data: data,
 	});
 });
+const getBloodReqById = catchAsync(async (req: Request, res: Response) => {
+		const user = (req as any).user as IAuthUser;
+
+	const id = req.params.id;
+	const data = await AdminService.getBloodReqById(id as string, user);
+
+	sendResponse(res, {
+		success: true,
+		statusCode: httpStatus.OK,
+		message: "Blood Request Retrived Success",
+		data: data,
+	});
+});
 const getAllDonor = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const query = req.query;
 	const data = await AdminService.getAllDonor(query, user);
 
@@ -29,7 +45,8 @@ const getAllDonor = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 const getAllRequest = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const query = req.query;
 	const data = await AdminService.getAllRequest(query, user);
 
@@ -41,7 +58,8 @@ const getAllRequest = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 const updateUserStaus = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const payload = req.body;
 	const data = await AdminService.updateUserStaus(payload, user);
 
@@ -54,7 +72,8 @@ const updateUserStaus = catchAsync(async (req: Request, res: Response) => {
 });
 const deleteFakeBloodRequest = catchAsync(
 	async (req: Request, res: Response) => {
-		const user = req.user!;
+			const user = (req as any).user as IAuthUser;
+
 		const id = req.params.id;
 		const data = await AdminService.deleteFakeBloodRequest(id as string, user);
 
@@ -67,7 +86,8 @@ const deleteFakeBloodRequest = catchAsync(
 	},
 );
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+	
 	const email = req.params.email;
 	const data = await AdminService.deleteUser(email as string, user);
 
@@ -79,7 +99,8 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 const verifyBloodReq = catchAsync(async (req: Request, res: Response) => {
-	const user = req.user!;
+		const user = (req as any).user as IAuthUser;
+
 	const id = req.params.id;
 	await AdminService.verifyBloodReq(id as string, user);
 
@@ -99,4 +120,5 @@ export const AdminController = {
 	getUsers,
 	updateUserStaus,
 	verifyBloodReq,
+	getBloodReqById
 };

@@ -14,10 +14,12 @@ route.post(
 	AuthController.singup,
 );
 route.post("/login", validateRequest(loginUserZodSchema), AuthController.login);
+route.post("/logout",auth(Role.ADMIN,Role.PATIENT,Role.DONOR),AuthController.logout)
 route.post("/verify-email", AuthController.emailVerify);
 route.post("/sent-otp", AuthController.sendOtp);
-route.post("/forgot-password",auth(Role.ADMIN,Role.PATIENT,Role.DONOR),AuthController.forgotPassword);
-route.post("/reset-password",auth(Role.ADMIN,Role.PATIENT,Role.DONOR), AuthController.resetPassword);
+route.post("/forgot-password",AuthController.forgotPassword);
+route.post("/refresh-token", AuthController.refreshToken);
+route.post("/reset-password", AuthController.resetPassword);
 route.get(
   "/google",
   passport.authenticate("google", {
@@ -28,7 +30,7 @@ route.get(
   "/google/login/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/login",
+    failureRedirect: "http://localhost:3000/login?status=error&message=Google authentication failed",
   }),
   AuthController.googleCallback
 );
