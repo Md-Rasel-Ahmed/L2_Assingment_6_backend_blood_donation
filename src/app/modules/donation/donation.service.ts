@@ -24,7 +24,7 @@ const createDonationPayment = async (user: IRequestUser,amount:number) => {
 					mode: "0011",
 					payerReference: "01723888888",
 					callbackURL:
-						"http://localhost:5000/api/v1/donation/bkash/payment/callback",
+						"https://assingment-6-delta.vercel.app/api/v1/donation/bkash/payment/callback",
 					merchantAssociationInfo: "MI05MID54RF09123456One",
 					amount: amount,
 					currency: "BDT",
