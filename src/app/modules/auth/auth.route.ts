@@ -30,7 +30,7 @@ route.get(
   "/google/login/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:3000/login?status=error&message=Google authentication failed",
+    failureRedirect: "https://donation-healthcare-frontend.vercel.app/login?status=error&message=Google authentication failed",
   }),
   AuthController.googleCallback
 );
