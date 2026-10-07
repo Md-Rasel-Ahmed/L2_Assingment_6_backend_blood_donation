@@ -23,7 +23,11 @@ const app: Application = express();
 
 app.use(
 	cors({
-		origin: config.frontend_url,
+		origin: [
+    'https://donation-healthcare-frontend.vercel.app',
+    'http://localhost:3000'
+  ],
+		// origin: config.frontend_url,
 		credentials: true,
 	}),
 );

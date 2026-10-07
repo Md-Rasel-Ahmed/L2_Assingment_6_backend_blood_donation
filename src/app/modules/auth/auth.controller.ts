@@ -52,7 +52,6 @@ const login = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 const logout = catchAsync(async (req: Request, res: Response) => {
-	console.log("log out trigger");
    res.clearCookie("accessToken")
    res.clearCookie("refreshToken")
 
