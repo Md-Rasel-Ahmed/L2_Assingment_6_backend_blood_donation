@@ -125,7 +125,7 @@ const googleCallback = catchAsync(async (req: Request, res: Response) => {
 		sameSite: "lax",
 		maxAge: 1 * 24 * 60 * 60 * 1000, //1day
 	});
-	res.redirect('http://localhost:3000/login?status=success&message=Logged in successfully with Google!')
+	res.redirect('https://donation-healthcare-frontend.vercel.app/login?status=success&message=Logged in successfully with Google!')
     // sendResponse(res,{
 	// 	statusCode:httpStatus.OK,
 	// 	message:"Google Login Success",
